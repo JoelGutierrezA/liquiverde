@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { ProductsModule } from './products/products.module';
 
 const envFilePaths = [resolve(process.cwd(), '..', '.env'), resolve(process.cwd(), '.env')];
 
@@ -14,6 +15,7 @@ const envFilePaths = [resolve(process.cwd(), '..', '.env'), resolve(process.cwd(
       isGlobal: true,
     }),
     PrismaModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

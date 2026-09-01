@@ -7,4 +7,7 @@ loadEnv({ path: resolve(process.cwd(), '.env'), quiet: true });
 
 export default defineConfig({
   schema: 'prisma/schema.prisma',
+  migrations: {
+    seed: 'ts-node --transpile-only prisma/seed.ts',
+  },
 });

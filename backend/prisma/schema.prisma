@@ -7,3 +7,40 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+model Store {
+  id        String    @id @default(uuid())
+  name      String
+  latitude  Float
+  longitude Float
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([name])
+}
+
+model Product {
+  id                  String   @id @default(uuid())
+  barcode             String   @unique
+  name                String
+  brand               String
+  category            String
+  description         String?
+  imageUrl            String?
+  price               Int
+  carbonKg            Float
+  localProduct        Boolean
+  recyclablePackaging Boolean
+  fairTrade           Boolean
+  socialScore         Int
+  source              String
+  storeId             String
+  store               Store    @relation(fields: [storeId], references: [id])
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  @@index([category])
+  @@index([storeId])
+  @@index([name])
+}

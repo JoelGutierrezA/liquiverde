@@ -33,6 +33,8 @@ Cuando `DATABASE_URL` esta configurado y la base de datos responde, el health ch
 ```bash
 npm run prisma:validate
 npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
 ```
 
 Variables requeridas:
@@ -40,4 +42,25 @@ Variables requeridas:
 - `DATABASE_URL`
 - `DIRECT_URL`
 
-No se han creado modelos de negocio todavia.
+`DATABASE_URL` usa el Shared Transaction Pooler de Supabase para runtime. `DIRECT_URL` usa el Shared Session Pooler para migraciones en entornos IPv4.
+
+## Dataset
+
+El seed carga datos desde:
+
+- `../dataset/stores.json`
+- `../dataset/products.json`
+
+La carga es idempotente mediante `upsert`.
+
+## Products API
+
+```text
+GET /api/products
+GET /api/products?search=leche
+GET /api/products?category=milk
+GET /api/products?search=entera&category=milk
+GET /api/products/:id
+```
+
+La respuesta incluye informacion basica del producto y de su tienda asociada. `search` busca por nombre o marca, y `category` filtra por categoria exacta. La API es de solo lectura en esta fase.

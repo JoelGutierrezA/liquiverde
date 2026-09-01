@@ -126,16 +126,16 @@ Separacion esperada por modulo:
 
 ### Fase 1 - Modelo, dataset y seed
 
-- Crear modelo Product.
-- Crear modelo Store.
-- Definir dataset propio de 40 a 60 productos ficticios realistas.
-- Preparar seed para PostgreSQL.
-- Usar precios en CLP.
+- Crear modelo Product. Implementado.
+- Crear modelo Store. Implementado.
+- Definir dataset propio de 40 a 60 productos ficticios realistas. Implementado con 50 productos.
+- Preparar seed para PostgreSQL. Implementado.
+- Usar precios en CLP. Implementado.
 
 ### Fase 2 - API Products y busqueda
 
-- Implementar endpoints base de productos.
-- Buscar por texto, categoria, id y barcode local.
+- Implementar endpoints base de productos. Implementado con `GET /api/products` y `GET /api/products/:id`.
+- Buscar por texto, categoria, id y barcode local. Implementado parcialmente con `search` y `category`; pendiente barcode local.
 - Mantener logica de negocio fuera de controllers.
 
 ### Fase 3 - Integracion Open Food Facts
@@ -397,17 +397,16 @@ liquiverde/
 Pendiente para fases posteriores:
 
 - Docker y Docker Compose
-- modulos funcionales de negocio
+- API Products avanzada: busqueda, filtros y barcode local
+- modulos funcionales de analisis y optimizacion
 - integraciones externas
 
 ## 13. Siguiente paso concreto
 
-El siguiente paso recomendado es iniciar Fase 1:
+El siguiente paso recomendado es continuar Fase 2:
 
-1. Definir modelos iniciales en Prisma.
-2. Modelar `Product` y `Store`.
-3. Preparar dataset controlado de productos y tiendas.
-4. Crear seed inicial.
-5. Crear primera migracion funcional contra Supabase.
+1. Implementar busqueda por barcode local.
+2. Mantener Open Food Facts fuera hasta la fase de integracion.
+3. Agregar validaciones o tests adicionales si el contrato de API crece.
 
 No se debe crear todavia ningun modulo funcional de Products, Sustainability, Optimization ni integraciones externas hasta recibir la instruccion correspondiente.

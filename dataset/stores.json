@@ -1,0 +1,32 @@
+[
+  {
+    "id": "store-centro",
+    "name": "Mercado Verde Centro",
+    "latitude": -33.4489,
+    "longitude": -70.6693
+  },
+  {
+    "id": "store-providencia",
+    "name": "EcoCompra Providencia",
+    "latitude": -33.4263,
+    "longitude": -70.6129
+  },
+  {
+    "id": "store-nunoa",
+    "name": "Ahorro Market Nunoa",
+    "latitude": -33.4569,
+    "longitude": -70.5975
+  },
+  {
+    "id": "store-santiago",
+    "name": "Punto Familiar Santiago",
+    "latitude": -33.4372,
+    "longitude": -70.6506
+  },
+  {
+    "id": "store-las-condes",
+    "name": "CompraSmart Las Condes",
+    "latitude": -33.4166,
+    "longitude": -70.5946
+  }
+]

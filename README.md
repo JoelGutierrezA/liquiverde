@@ -71,9 +71,80 @@ Usa `.env.example` como referencia. No se debe versionar ningun archivo `.env` r
 Para conectar el backend con Supabase, configura estas variables en el entorno local o de deploy:
 
 - `DATABASE_URL`: connection string principal usada por Prisma Client.
-- `DIRECT_URL`: connection string directa usada por Prisma para operaciones de migracion.
+- `DIRECT_URL`: connection string usada por Prisma para operaciones de migracion.
 
 No copies credenciales reales en README, commits ni archivos versionados.
+
+Para Supabase, `DATABASE_URL` usa el Shared Transaction Pooler y `DIRECT_URL` usa el Shared Session Pooler para migraciones en entornos IPv4.
+
+## Base de datos y dataset
+
+El schema inicial de Prisma define:
+
+- `Store`: tiendas ficticias con coordenadas en Santiago de Chile.
+- `Product`: productos con precio en CLP, categoria, atributos demostrativos de sostenibilidad y relacion con tienda.
+
+El dataset controlado vive en:
+
+- `dataset/stores.json`
+- `dataset/products.json`
+
+Incluye 5 tiendas ficticias y 50 productos distribuidos en 10 categorias. Los precios, huella de carbono y atributos sociales/ambientales son datos demostrativos, no mediciones oficiales.
+
+## Migraciones y seed
+
+Desde `backend/`:
+
+```bash
+npm run prisma:validate
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+```
+
+El seed es idempotente: usa `upsert` para tiendas por `id` y productos por `barcode`.
+
+## API disponible
+
+Health check:
+
+```http
+GET /api/health
+```
+
+Productos:
+
+```http
+GET /api/products
+GET /api/products?search=leche
+GET /api/products?category=milk
+GET /api/products?search=entera&category=milk
+GET /api/products/:id
+```
+
+Ejemplo de respuesta para un producto:
+
+```json
+{
+  "id": "prod-milk-001",
+  "barcode": "7800000000001",
+  "name": "Leche entera familiar 1 L",
+  "brand": "Campo Claro",
+  "category": "milk",
+  "price": 1150,
+  "store": {
+    "id": "store-centro",
+    "name": "Mercado Verde Centro"
+  }
+}
+```
+
+Query params opcionales:
+
+- `search`: busca por `name` o `brand`.
+- `category`: filtra por categoria exacta.
+
+La API de productos es de solo lectura en esta etapa. Barcode externo, sostenibilidad y optimizacion se implementaran en fases posteriores.
 
 ## Estado actual
 
@@ -85,7 +156,9 @@ Fase 0 tecnica:
 - CORS preparado para desarrollo local.
 - Validacion global preparada en NestJS.
 - Prisma configurado para PostgreSQL/Supabase sin modelos de negocio todavia.
-- Carpeta `dataset/` creada sin datos funcionales.
+- Modelos Prisma iniciales `Store` y `Product` creados.
+- Dataset controlado inicial creado.
+- API Products base de solo lectura creada con busqueda y filtro por categoria.
 
 ## Plan del proyecto
 

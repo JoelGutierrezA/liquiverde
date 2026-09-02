@@ -1,0 +1,100 @@
+.recommendation-card {
+  display: grid;
+  height: 100%;
+  min-width: 0;
+  gap: 0.9rem;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.recommendation-card__header {
+  display: grid;
+  gap: 0.3rem;
+}
+
+p,
+h3 {
+  margin: 0;
+}
+
+.recommendation-card__header p,
+.recommendation-card__header span,
+dt {
+  color: #607267;
+  font-size: 0.82rem;
+  font-weight: 800;
+}
+
+h3 {
+  color: #173428;
+  font-size: 1.05rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.recommendation-card__price {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+strong {
+  color: #123626;
+  font-size: 1.35rem;
+}
+
+.recommendation-card__price span {
+  border-radius: 999px;
+  background: #e7f1ea;
+  color: #1e6044;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.32rem 0.55rem;
+}
+
+.recommendation-card__metrics {
+  display: grid;
+  gap: 0.55rem;
+  margin: 0;
+}
+
+.recommendation-card__metrics div {
+  display: grid;
+  gap: 0.15rem;
+}
+
+dd {
+  margin: 0;
+  color: #1f3328;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.recommendation-card__reason {
+  color: #52645c;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.recommendation-card__link {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  align-self: end;
+  border-radius: 8px;
+  background: #1f6b4a;
+  color: #fff;
+  font-weight: 800;
+  padding: 0.55rem 0.8rem;
+  text-decoration: none;
+}
+
+.recommendation-card__link:focus-visible {
+  outline: 3px solid #f4c84a;
+  outline-offset: 3px;
+}

@@ -42,6 +42,131 @@ h1 {
   padding: 0.65rem 0.85rem;
 }
 
+.catalog__actions {
+  display: grid;
+  gap: 0.65rem;
+  justify-items: end;
+}
+
+.catalog__actions a {
+  min-height: 40px;
+  border-radius: 8px;
+  background: #1f6b4a;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 800;
+  padding: 0 0.8rem;
+  text-decoration: none;
+}
+
+.barcode-panel {
+  display: grid;
+  gap: 0.85rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+}
+
+.barcode-panel h2 {
+  margin: 0;
+  color: #173428;
+  font-size: 1.2rem;
+}
+
+.barcode-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto auto;
+  gap: 0.75rem;
+}
+
+.barcode-form button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #1f6b4a;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0 1rem;
+}
+
+.barcode-form .secondary-action {
+  background: #e7f1ea;
+  color: #1e6044;
+}
+
+.barcode-message {
+  margin: 0;
+  border-radius: 8px;
+  background: #edf6ef;
+  color: #1f6046;
+  font-weight: 700;
+  padding: 0.75rem 0.9rem;
+}
+
+.barcode-message--error {
+  background: #f8e9e3;
+  color: #7c3825;
+}
+
+.external-product {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 1rem;
+  border: 1px solid #e0e8e3;
+  border-radius: 8px;
+  background: #fbfdfb;
+  padding: 1rem;
+}
+
+.external-product img {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.external-product span {
+  color: #26704d;
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.external-product h3 {
+  color: #173428;
+  font-size: 1.25rem;
+  margin: 0.25rem 0;
+}
+
+.external-product p {
+  color: #52645c;
+  margin: 0 0 0.8rem;
+}
+
+.external-product dl {
+  display: grid;
+  gap: 0.5rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin: 0;
+}
+
+.external-product dt {
+  color: #607267;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.external-product dd {
+  color: #1f3328;
+  font-weight: 800;
+  margin: 0.2rem 0 0;
+}
+
 .filters {
   display: grid;
   grid-template-columns: minmax(220px, 1fr) minmax(180px, 260px) auto;
@@ -118,7 +243,10 @@ button:focus-visible {
 
 @media (max-width: 780px) {
   .catalog__header,
-  .filters {
+  .filters,
+  .barcode-form,
+  .external-product,
+  .external-product dl {
     grid-template-columns: 1fr;
   }
 
@@ -129,5 +257,9 @@ button:focus-visible {
 
   .catalog__count {
     width: fit-content;
+  }
+
+  .catalog__actions {
+    justify-items: start;
   }
 }

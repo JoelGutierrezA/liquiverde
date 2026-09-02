@@ -22,5 +22,6 @@ describe('App', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.brand')?.textContent).toContain('LiquiVerde');
     expect(compiled.querySelector('nav')?.textContent).toContain('Productos');
+    expect(compiled.querySelector('nav')?.textContent).toContain('Optimizar compra');
   });
 });

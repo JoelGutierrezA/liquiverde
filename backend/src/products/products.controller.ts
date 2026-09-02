@@ -1,10 +1,14 @@
 import { BadRequestException, Controller, Get, Param, Query } from '@nestjs/common';
+import { RecommendationsApplicationService } from '../recommendations/recommendations-application.service';
 import { FindProductsQueryDto } from './dto/find-products-query.dto';
 import { ProductsService } from './products.service';
 
 @Controller('products')
 export class ProductsController {
-  constructor(private readonly productsService: ProductsService) {}
+  constructor(
+    private readonly productsService: ProductsService,
+    private readonly recommendationsApplicationService: RecommendationsApplicationService,
+  ) {}
 
   @Get()
   findAll(@Query() query: FindProductsQueryDto) {
@@ -25,6 +29,13 @@ export class ProductsController {
     this.validateProductId(id);
 
     return this.productsService.analyzeProduct(id);
+  }
+
+  @Get(':id/alternatives')
+  findAlternatives(@Param('id') id: string) {
+    this.validateProductId(id);
+
+    return this.recommendationsApplicationService.findAlternatives(id);
   }
 
   @Get(':id')

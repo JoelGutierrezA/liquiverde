@@ -16,6 +16,11 @@ export const routes: Routes = [
       import('./features/products/product-detail/product-detail.component').then((m) => m.ProductDetailComponent),
   },
   {
+    path: 'optimizer',
+    loadComponent: () =>
+      import('./features/optimizer/optimizer.component').then((m) => m.OptimizerComponent),
+  },
+  {
     path: '**',
     redirectTo: '',
   },

@@ -1,0 +1,268 @@
+<section class="optimizer" aria-labelledby="optimizer-title">
+  <header class="optimizer__header">
+    <div>
+      <p class="eyebrow">Optimizador</p>
+      <h1 id="optimizer-title">Optimiza tu compra</h1>
+      <p>
+        Define tu presupuesto y que necesitas comprar. LiquiVerde buscara la combinacion que
+        mejor equilibre precio y sostenibilidad.
+      </p>
+    </div>
+  </header>
+
+  <div class="optimizer__layout">
+    <form class="optimizer-form" (submit)="$event.preventDefault(); optimize()">
+      <section class="panel" aria-labelledby="budget-title">
+        <span class="step">1</span>
+        <h2 id="budget-title">Presupuesto</h2>
+        <label for="budget">Presupuesto</label>
+        <input
+          id="budget"
+          type="number"
+          min="1"
+          placeholder="15000"
+          [formControl]="budgetControl"
+          (blur)="budgetTouched.set(true)"
+        />
+        <p class="hint">Ingresa el monto maximo que quieres gastar.</p>
+        @if ((budgetControl.invalid && (budgetControl.touched || budgetTouched())) || budgetTouched()) {
+          @if (budgetControl.invalid) {
+            <p class="form-error" role="alert">Ingresa un presupuesto mayor que 0.</p>
+          }
+        }
+        @if (formattedBudget()) {
+          <p class="formatted-budget">{{ formattedBudget() }}</p>
+        }
+      </section>
+
+      <section class="panel" aria-labelledby="items-title">
+        <span class="step">2</span>
+        <h2 id="items-title">Que necesitas comprar</h2>
+        <div class="category-grid" role="list" aria-label="Categorias disponibles">
+          @for (category of categories; track category.value) {
+            <button
+              type="button"
+              class="category-card"
+              [class.is-selected]="hasCategory(category.value)"
+              [attr.aria-pressed]="hasCategory(category.value)"
+              (click)="toggleCategory(category.value)"
+            >
+              <span>{{ category.label }}</span>
+            </button>
+          }
+        </div>
+
+        @if (selectedCategories().length === 0) {
+          <p class="hint">Selecciona al menos una categoria.</p>
+        } @else {
+          <div class="selected-items" data-testid="selected-categories">
+            @for (item of selectedCategories(); track trackSelectedCategory($index, item)) {
+              <article class="selected-item">
+                <div>
+                  <strong>{{ categoryLabel(item.category) }}</strong>
+                  <span>Cantidad {{ item.quantity }}</span>
+                </div>
+                <div class="quantity-control" aria-label="Cantidad">
+                  <button type="button" (click)="decrementQuantity(item.category)">-</button>
+                  <input
+                    type="number"
+                    min="1"
+                    [value]="item.quantity"
+                    #quantityInput
+                    (change)="setQuantity(item.category, quantityInput.valueAsNumber)"
+                    [attr.aria-label]="'Cantidad de ' + categoryLabel(item.category)"
+                  />
+                  <button type="button" (click)="incrementQuantity(item.category)">+</button>
+                </div>
+                <button type="button" class="text-action" (click)="removeCategory(item.category)">
+                  Eliminar
+                </button>
+              </article>
+            }
+          </div>
+        }
+      </section>
+
+      <section class="panel" aria-labelledby="preset-title">
+        <span class="step">3</span>
+        <h2 id="preset-title">Que quieres priorizar</h2>
+        <div class="preset-grid">
+          @for (preset of presets; track preset.id) {
+            <button
+              type="button"
+              class="preset-card"
+              [class.is-selected]="selectedPreset().id === preset.id"
+              [attr.aria-pressed]="selectedPreset().id === preset.id"
+              (click)="selectPreset(preset)"
+            >
+              <strong>{{ preset.label }}</strong>
+              <span>{{ preset.description }}</span>
+            </button>
+          }
+        </div>
+        <div class="weights">
+          <span>Precio: {{ weightPercent(selectedPreset().weights.economic) }}</span>
+          <span>Sostenibilidad: {{ weightPercent(selectedPreset().weights.sustainability) }}</span>
+        </div>
+      </section>
+
+      <section class="panel panel--submit" aria-labelledby="submit-title">
+        <span class="step">4</span>
+        <h2 id="submit-title">Optimizar</h2>
+        <button type="submit" class="primary-action" [disabled]="!canSubmit()">
+          @if (state() === 'loading') {
+            Buscando la mejor combinacion...
+          } @else {
+            Optimizar compra
+          }
+        </button>
+      </section>
+    </form>
+
+    <aside class="result-area" aria-live="polite">
+      @if (state() === 'initial') {
+        <div class="panel state-panel">
+          <span class="step">5</span>
+          <h2>Resultado</h2>
+          <p>Completa el formulario y ejecuta la optimizacion para ver tu lista recomendada.</p>
+        </div>
+      } @else if (state() === 'loading') {
+        <p class="state-panel">Buscando la mejor combinacion...</p>
+      } @else if (state() === 'insufficient-budget') {
+        <div class="state-panel state-panel--error" role="alert" data-testid="insufficient-budget">
+          <h2>Presupuesto insuficiente</h2>
+          <p>Tu presupuesto no alcanza para incluir al menos un producto de cada categoria seleccionada.</p>
+          <p>Aumenta el presupuesto o elimina una categoria.</p>
+        </div>
+      } @else if (state() === 'category-error') {
+        <div class="state-panel state-panel--error" role="alert">
+          <h2>No pudimos procesar la seleccion</h2>
+          <p>No pudimos procesar una de las categorias seleccionadas.</p>
+        </div>
+      } @else if (state() === 'error') {
+        <div class="state-panel state-panel--error" role="alert" data-testid="generic-error">
+          <h2>No pudimos optimizar tu compra</h2>
+          <p>Intenta nuevamente.</p>
+        </div>
+      } @else if (result(); as optimized) {
+        <section class="result-panel" aria-labelledby="result-title" data-testid="optimization-result">
+          <header class="result-panel__header">
+            <div>
+              <p class="eyebrow">Resultado</p>
+              <h2 id="result-title">Tu compra optimizada</h2>
+            </div>
+            <div class="profile-used">
+              <span>Perfil usado: {{ selectedPreset().label }}</span>
+              <strong>
+                {{ weightPercent(optimized.weights.economic) }} Precio /
+                {{ weightPercent(optimized.weights.sustainability) }} Sostenibilidad
+              </strong>
+            </div>
+          </header>
+
+          <div class="metrics-grid">
+            <article>
+              <span>Total compra</span>
+              <strong>{{ formatCurrency(optimized.totalCost) }}</strong>
+            </article>
+            <article>
+              <span>Ahorro estimado</span>
+              <strong>{{ formatCurrency(optimized.savings) }}</strong>
+              <small>{{ formatPercent(optimized.savingsPercentage) }}</small>
+            </article>
+            <article>
+              <span>Sostenibilidad</span>
+              <strong>{{ formatScore(optimized.averageSustainabilityScore) }} / 100</strong>
+              <small>{{ scoreLabel(optimized.averageSustainabilityScore) }}</small>
+            </article>
+            <article>
+              <span>CO2 estimado</span>
+              <strong>{{ formatCarbon(optimized.totalCarbonKg) }}</strong>
+            </article>
+          </div>
+
+          <div class="summary-copy">
+            @if (optimized.remainingBudget === 0) {
+              <p>Utilizaste todo tu presupuesto.</p>
+            } @else {
+              <p>Te quedan {{ formatCurrency(optimized.remainingBudget) }} de tu presupuesto.</p>
+            }
+            <p>
+              Ahorro comparado con la combinacion mas cara disponible para las categorias seleccionadas.
+            </p>
+            <p>
+              Reduccion estimada de CO2: {{ formatCarbon(optimized.carbonReductionKg) }}
+              ({{ formatPercent(optimized.carbonReductionPercentage) }}), comparada con las alternativas de mayor
+              huella.
+            </p>
+          </div>
+
+          <dl class="secondary-metrics">
+            <div>
+              <dt>Utilidad economica promedio</dt>
+              <dd>{{ formatScore(optimized.averageEconomicUtility) }} / 100</dd>
+            </div>
+            <div>
+              <dt>Utility promedio</dt>
+              <dd>{{ formatScore(optimized.averageUtilityScore) }} / 100</dd>
+            </div>
+            <div>
+              <dt>Presupuesto</dt>
+              <dd>{{ formatCurrency(optimized.budget) }}</dd>
+            </div>
+            <div>
+              <dt>Baseline costo</dt>
+              <dd>{{ formatCurrency(optimized.baselineCost) }}</dd>
+            </div>
+            <div>
+              <dt>Baseline carbono</dt>
+              <dd>{{ formatCarbon(optimized.baselineCarbonKg) }}</dd>
+            </div>
+          </dl>
+
+          @if (multiStoreCount(optimized) > 1) {
+            <p class="store-notice">
+              Esta combinacion incluye productos de {{ multiStoreCount(optimized) }} tiendas.
+            </p>
+          }
+
+          <div class="selected-results">
+            @for (item of optimized.selectedItems; track trackSelectedItem($index, item)) {
+              <article class="result-item" data-testid="selected-product">
+                <header>
+                  <span>{{ categoryLabel(item.category) }} x {{ item.quantity }}</span>
+                  <strong>{{ formatCurrency(item.subtotal) }}</strong>
+                </header>
+                <h3>{{ item.product.name }}</h3>
+                <p>{{ item.product.brand }}</p>
+                <p>{{ item.product.store.name }}</p>
+                <dl>
+                  <div>
+                    <dt>Precio unitario</dt>
+                    <dd>{{ formatCurrency(item.product.price) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Sostenibilidad</dt>
+                    <dd>{{ formatScore(item.sustainabilityScore) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Valor economico</dt>
+                    <dd>{{ formatScore(item.economicUtility) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Utility</dt>
+                    <dd>{{ formatScore(item.utilityScore) }}</dd>
+                  </div>
+                  <div>
+                    <dt>Carbono subtotal</dt>
+                    <dd>{{ formatCarbon(item.carbonSubtotal) }}</dd>
+                  </div>
+                </dl>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </aside>
+  </div>
+</section>

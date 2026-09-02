@@ -55,4 +55,31 @@ describe('ProductsApiService', () => {
     expect(request.request.method).toBe('GET');
     request.flush({});
   });
+
+  it('requests product analysis by id', () => {
+    service.getProductAnalysis('prod-milk-001').subscribe();
+
+    const request = httpTesting.expectOne(`${API_BASE_URL}/products/prod-milk-001/analysis`);
+
+    expect(request.request.method).toBe('GET');
+    request.flush({});
+  });
+
+  it('requests product alternatives by id', () => {
+    service.getProductAlternatives('prod-milk-001').subscribe();
+
+    const request = httpTesting.expectOne(`${API_BASE_URL}/products/prod-milk-001/alternatives`);
+
+    expect(request.request.method).toBe('GET');
+    request.flush({});
+  });
+
+  it('requests product by barcode', () => {
+    service.findProductByBarcode('7800000000001').subscribe();
+
+    const request = httpTesting.expectOne(`${API_BASE_URL}/products/barcode/7800000000001`);
+
+    expect(request.request.method).toBe('GET');
+    request.flush({});
+  });
 });

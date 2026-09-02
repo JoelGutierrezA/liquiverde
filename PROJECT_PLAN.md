@@ -168,6 +168,9 @@ Sustainability Score =
 - Crear rutas `/`, `/products` y `/products/:id`. Implementado en P7.1.
 - Consumir API NestJS mediante servicios Angular. Implementado en P7.1.
 - Crear UI responsive y demostrable. Implementado en P7.1.
+- Mostrar analisis visual de sostenibilidad en detalle. Implementado en P7.2.
+- Buscar productos por barcode desde Angular. Implementado en P7.2.
+- Mostrar resultados externos de Open Food Facts sin inventar datos. Implementado en P7.2.
 
 ### Fase 6 - Optimization Engine
 
@@ -180,14 +183,16 @@ Sustainability Score =
 
 ### Fase 7 - Frontend optimizador
 
-- Crear ruta `/optimizer`.
-- Permitir presupuesto, items y pesos.
-- Mostrar resultado de optimizacion.
+- Crear ruta `/optimizer`. Implementado en P8.
+- Permitir presupuesto, items y pesos. Implementado en P8.
+- Mostrar resultado de optimizacion. Implementado en P8.
 
 ### Fase 8 - Sustitucion inteligente
 
-- Recomendar alternativas dentro de la misma categoria.
-- Combinar ahorro normalizado y mejora de sostenibilidad.
+- Recomendar alternativas dentro de la misma categoria. Implementado en P9.
+- Combinar ahorro normalizado y mejora de sostenibilidad. Implementado en P9 con pesos 40% ahorro y 60% sostenibilidad.
+- Exponer `GET /api/products/:id/alternatives`. Implementado en P9.
+- Mostrar recomendaciones en el detalle Angular de producto. Implementado en P9.
 
 ### Fase 9 - Dashboard e impacto
 
@@ -269,7 +274,7 @@ Rutas implementadas en P7.1:
 /products/:id
 ```
 
-Ruta posterior:
+Ruta implementada en P8:
 
 ```text
 /optimizer
@@ -389,7 +394,7 @@ Recomendacion:
 
 ## 12. Estado actual del repositorio
 
-Fases tecnicas hasta P7.1 implementadas. La estructura base actual es:
+Fases tecnicas hasta P9 implementadas. La estructura base actual es:
 
 ```text
 liquiverde/
@@ -405,17 +410,14 @@ liquiverde/
 Pendiente para fases posteriores:
 
 - Docker y Docker Compose
-- Frontend avanzado de sostenibilidad
-- Frontend del optimizador
-- Recomendaciones y sustitucion inteligente
 - Dashboard e impacto
 
 ## 13. Siguiente paso concreto
 
 El siguiente paso recomendado es continuar con la siguiente fase solicitada:
 
-1. Mantener Recommendations fuera hasta su fase.
-2. Implementar P7.2 solo cuando se quiera mostrar el analisis visual de sostenibilidad en el frontend.
-3. Mantener el optimizador frontend para P8.
+1. Mantener P9 cerrada sin persistencia de recomendaciones.
+2. Avanzar a Docker, README final o dashboard solo cuando se solicite su fase.
+3. Evitar mapas, autenticacion y persistencia de usuarios hasta sus fases.
 
-No se debe crear todavia UI de barcode, optimizador, recomendaciones, dashboard ni mapas hasta recibir la instruccion correspondiente.
+No se debe crear todavia dashboard, mapas, autenticacion ni persistencia de usuarios hasta recibir la instruccion correspondiente.

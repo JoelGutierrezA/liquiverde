@@ -16,56 +16,213 @@
       <button type="button" (click)="retry()">Reintentar</button>
     </div>
   } @else if (product(); as selectedProduct) {
-    <article class="detail-card" data-testid="product-detail">
-      <div class="detail-card__media">
-        @if (selectedProduct.imageUrl) {
-          <img [src]="selectedProduct.imageUrl" [alt]="selectedProduct.name" />
-        } @else {
-          <div class="detail-card__placeholder" aria-hidden="true">
-            <span>{{ selectedProduct.category.slice(0, 2).toUpperCase() }}</span>
+    <div class="detail-stack">
+      <article class="detail-card" data-testid="product-detail">
+        <div class="detail-card__media">
+          @if (selectedProduct.imageUrl) {
+            <img [src]="selectedProduct.imageUrl" [alt]="selectedProduct.name" />
+          } @else {
+            <div class="detail-card__placeholder" aria-hidden="true">
+              <span>{{ selectedProduct.category.slice(0, 2).toUpperCase() }}</span>
+            </div>
+          }
+        </div>
+
+        <div class="detail-card__content">
+          <p class="eyebrow">{{ categoryLabel(selectedProduct.category) }}</p>
+          <h1 id="product-title">{{ selectedProduct.name }}</h1>
+          <p class="brand">{{ selectedProduct.brand ?? 'Marca no informada' }}</p>
+          <strong class="price">
+            {{ formatPrice(selectedProduct.price) }}
+          </strong>
+
+          @if (selectedProduct.description) {
+            <p class="description">{{ selectedProduct.description }}</p>
+          }
+
+          <dl class="facts">
+            <div>
+              <dt>Tienda</dt>
+              <dd>{{ selectedProduct.store?.name ?? 'No informada' }}</dd>
+            </div>
+            <div>
+              <dt>Huella de carbono</dt>
+              <dd>{{ formatCarbon(selectedProduct.carbonKg) }}</dd>
+            </div>
+            <div>
+              <dt>Producto local</dt>
+              <dd>{{ selectedProduct.localProduct ? 'Si' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Envase reciclable</dt>
+              <dd>{{ selectedProduct.recyclablePackaging ? 'Si' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Fair Trade</dt>
+              <dd>{{ selectedProduct.fairTrade ? 'Si' : 'No' }}</dd>
+            </div>
+            <div>
+              <dt>Indicador social base</dt>
+              <dd>{{ selectedProduct.socialScore ?? 'No disponible' }}/100</dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+
+      <section class="analysis-panel" aria-labelledby="analysis-title" data-testid="analysis-panel">
+        <header class="analysis-panel__header">
+          <div>
+            <p class="eyebrow">Sostenibilidad</p>
+            <h2 id="analysis-title">Analisis de sostenibilidad</h2>
+            <p>El indice combina precio, impacto ambiental e indicadores sociales.</p>
+          </div>
+          <div class="formula" aria-label="Formula del indice">
+            <span>40% Economico</span>
+            <span>40% Ambiental</span>
+            <span>20% Social</span>
+          </div>
+        </header>
+
+        @if (analysisState() === 'loading') {
+          <p class="state" data-testid="analysis-loading">Calculando sostenibilidad...</p>
+        } @else if (analysisState() === 'error') {
+          <div class="state state--error" role="alert" data-testid="analysis-error">
+            <p>No pudimos calcular el analisis de sostenibilidad.</p>
+            <button type="button" (click)="retryAnalysis()">Reintentar</button>
+          </div>
+        } @else if (analysis(); as analysisResult) {
+          <div class="score-summary">
+            <div>
+              <span class="score-summary__label">Indice de sostenibilidad</span>
+              <strong>{{ formatScore(analysisResult.analysis.sustainabilityScore) }} / 100</strong>
+              <span [class]="'score-band score-band--' + scoreBand(analysisResult.analysis.sustainabilityScore).tone">
+                {{ scoreLabel(analysisResult.analysis.sustainabilityScore) }}
+              </span>
+            </div>
+            <div
+              class="score-meter"
+              role="progressbar"
+              aria-label="Indice de sostenibilidad"
+              [attr.aria-valuenow]="analysisResult.analysis.sustainabilityScore"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              <span [style.width.%]="analysisResult.analysis.sustainabilityScore"></span>
+            </div>
+          </div>
+
+          <p class="context">
+            Comparado con {{ analysisResult.context.comparedProducts }} productos de la categoria
+            {{ categoryLabel(analysisResult.context.category) }}.
+          </p>
+
+          <div class="score-grid">
+            <article>
+              <span>Economico</span>
+              <strong>{{ formatScore(analysisResult.analysis.economicScore) }} / 100</strong>
+              <div
+                class="score-meter"
+                role="progressbar"
+                aria-label="Score economico"
+                [attr.aria-valuenow]="analysisResult.analysis.economicScore"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <span [style.width.%]="analysisResult.analysis.economicScore"></span>
+              </div>
+            </article>
+            <article>
+              <span>Ambiental</span>
+              <strong>{{ formatScore(analysisResult.analysis.environmentalScore) }} / 100</strong>
+              <div
+                class="score-meter"
+                role="progressbar"
+                aria-label="Score ambiental"
+                [attr.aria-valuenow]="analysisResult.analysis.environmentalScore"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <span [style.width.%]="analysisResult.analysis.environmentalScore"></span>
+              </div>
+            </article>
+            <article>
+              <span>Social</span>
+              <strong>{{ formatScore(analysisResult.analysis.socialScore) }} / 100</strong>
+              <div
+                class="score-meter"
+                role="progressbar"
+                aria-label="Score social"
+                [attr.aria-valuenow]="analysisResult.analysis.socialScore"
+                aria-valuemin="0"
+                aria-valuemax="100"
+              >
+                <span [style.width.%]="analysisResult.analysis.socialScore"></span>
+              </div>
+            </article>
+          </div>
+
+          <div class="environmental-details">
+            <article>
+              <span>Huella estimada</span>
+              <strong>{{ formatCarbon(selectedProduct.carbonKg) }}</strong>
+              <small>
+                Carbon score: {{ analysisResult.analysis.breakdown.carbonScore }} / 100.
+                Estimacion utilizada para fines comparativos.
+              </small>
+            </article>
+            <article>
+              <span>Producto local</span>
+              <strong>{{ selectedProduct.localProduct ? 'Si' : 'No' }}</strong>
+              <small>{{ analysisResult.analysis.breakdown.localProductScore }} / 100</small>
+            </article>
+            <article>
+              <span>Envase reciclable</span>
+              <strong>{{ selectedProduct.recyclablePackaging ? 'Si' : 'No' }}</strong>
+              <small>{{ analysisResult.analysis.breakdown.recyclablePackagingScore }} / 100</small>
+            </article>
+            <article>
+              <span>Fair Trade</span>
+              <strong>{{ selectedProduct.fairTrade ? 'Si' : 'No' }}</strong>
+              <small>{{ analysisResult.analysis.breakdown.fairTradeScore }} / 100</small>
+            </article>
           </div>
         }
-      </div>
+      </section>
 
-      <div class="detail-card__content">
-        <p class="eyebrow">{{ categoryLabel(selectedProduct.category) }}</p>
-        <h1 id="product-title">{{ selectedProduct.name }}</h1>
-        <p class="brand">{{ selectedProduct.brand ?? 'Marca no informada' }}</p>
-        <strong class="price">
-          {{ formatPrice(selectedProduct.price) }}
-        </strong>
+      <section
+        class="analysis-panel recommendations-panel"
+        aria-labelledby="recommendations-title"
+        data-testid="recommendations-panel"
+      >
+        <header class="analysis-panel__header">
+          <div>
+            <p class="eyebrow">Sustitucion inteligente</p>
+            <h2 id="recommendations-title">Alternativas recomendadas</h2>
+            <p>Opciones de la misma categoria que pueden ayudarte a ahorrar o mejorar tu impacto.</p>
+          </div>
+        </header>
 
-        @if (selectedProduct.description) {
-          <p class="description">{{ selectedProduct.description }}</p>
+        @if (alternativesState() === 'loading') {
+          <p class="state" data-testid="alternatives-loading">Buscando mejores alternativas...</p>
+        } @else if (alternativesState() === 'error') {
+          <div class="state state--error" role="alert" data-testid="alternatives-error">
+            <p>No pudimos cargar alternativas en este momento.</p>
+            <button type="button" (click)="retryAlternatives()">Reintentar</button>
+          </div>
+        } @else if (alternatives(); as alternativesResult) {
+          @if (alternativesResult.recommendations.length > 0) {
+            <div class="recommendations-grid">
+              @for (recommendation of alternativesResult.recommendations; track recommendation.product.id) {
+                <app-recommendation-card [recommendation]="recommendation" />
+              }
+            </div>
+          } @else {
+            <p class="state" data-testid="alternatives-empty">
+              No encontramos una alternativa claramente mejor para este producto.
+            </p>
+          }
         }
-
-        <dl class="facts">
-          <div>
-            <dt>Tienda</dt>
-            <dd>{{ selectedProduct.store?.name ?? 'No informada' }}</dd>
-          </div>
-          <div>
-            <dt>Huella de carbono</dt>
-            <dd>{{ selectedProduct.carbonKg }} kg CO2e</dd>
-          </div>
-          <div>
-            <dt>Producto local</dt>
-            <dd>{{ selectedProduct.localProduct ? 'Si' : 'No' }}</dd>
-          </div>
-          <div>
-            <dt>Envase reciclable</dt>
-            <dd>{{ selectedProduct.recyclablePackaging ? 'Si' : 'No' }}</dd>
-          </div>
-          <div>
-            <dt>Fair Trade</dt>
-            <dd>{{ selectedProduct.fairTrade ? 'Si' : 'No' }}</dd>
-          </div>
-          <div>
-            <dt>Indicador social base</dt>
-            <dd>{{ selectedProduct.socialScore }}/100</dd>
-          </div>
-        </dl>
-      </div>
-    </article>
+      </section>
+    </div>
   }
 </section>

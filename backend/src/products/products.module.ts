@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { OpenFoodFactsModule } from '../integrations/open-food-facts/open-food-facts.module';
+import { RecommendationsModule } from '../recommendations/recommendations.module';
 import { SustainabilityModule } from '../sustainability/sustainability.module';
 import { ProductsController } from './products.controller';
 import { ProductsService } from './products.service';
 
 @Module({
-  imports: [OpenFoodFactsModule, SustainabilityModule],
+  imports: [OpenFoodFactsModule, SustainabilityModule, RecommendationsModule],
   controllers: [ProductsController],
   providers: [ProductsService],
 })

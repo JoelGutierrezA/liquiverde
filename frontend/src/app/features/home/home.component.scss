@@ -47,7 +47,14 @@ h1 {
   line-height: 1.7;
 }
 
-.primary-action {
+.hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.primary-action,
+.secondary-action {
   display: inline-flex;
   min-height: 44px;
   align-items: center;
@@ -60,7 +67,14 @@ h1 {
   text-decoration: none;
 }
 
-.primary-action:focus-visible {
+.secondary-action {
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.primary-action:focus-visible,
+.secondary-action:focus-visible {
   outline: 3px solid #fff;
   outline-offset: 3px;
 }

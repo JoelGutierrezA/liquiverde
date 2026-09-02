@@ -3,12 +3,81 @@
     <div>
       <p class="eyebrow">Catalogo</p>
       <h1 id="products-title">Explora productos</h1>
-      <p>Busca por nombre o marca, filtra por categoria y compara alternativas disponibles.</p>
+      <p>Busca por nombre, marca, categoria o codigo de barras.</p>
     </div>
-    <p class="catalog__count" data-testid="products-count">
-      {{ products().length }} productos
-    </p>
+    <div class="catalog__actions">
+      <a routerLink="/optimizer">Optimizar compra</a>
+      <p class="catalog__count" data-testid="products-count">
+        {{ products().length }} productos
+      </p>
+    </div>
   </header>
+
+  <section class="barcode-panel" aria-labelledby="barcode-title">
+    <div>
+      <p class="eyebrow">Codigo de barras</p>
+      <h2 id="barcode-title">Buscar por codigo de barras</h2>
+    </div>
+
+    <form class="barcode-form" (submit)="$event.preventDefault(); searchBarcode()">
+      <label class="sr-only" for="barcode-search">Buscar por codigo de barras</label>
+      <input
+        id="barcode-search"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        [formControl]="barcodeControl"
+        placeholder="Ej: 3017620422003"
+      />
+      <button type="submit">Buscar</button>
+      <button type="button" class="secondary-action" (click)="clearBarcodeSearch()">Limpiar</button>
+    </form>
+
+    @if (barcodeState() === 'invalid') {
+      <p class="barcode-message" role="alert" data-testid="barcode-invalid">
+        Ingresa un codigo de barras valido.
+      </p>
+    } @else if (barcodeState() === 'loading') {
+      <p class="barcode-message" data-testid="barcode-loading">Buscando producto...</p>
+    } @else if (barcodeState() === 'not-found') {
+      <p class="barcode-message" role="status" data-testid="barcode-not-found">
+        No encontramos un producto con ese codigo de barras.
+      </p>
+    } @else if (barcodeState() === 'external-error') {
+      <p class="barcode-message barcode-message--error" role="alert" data-testid="barcode-external-error">
+        El servicio externo de productos no esta disponible en este momento.
+      </p>
+    } @else if (barcodeState() === 'error') {
+      <p class="barcode-message barcode-message--error" role="alert">
+        No pudimos buscar ese codigo de barras. Intenta nuevamente.
+      </p>
+    } @else if (barcodeProduct(); as externalProduct) {
+      <article class="external-product" data-testid="barcode-external-product">
+        @if (externalProduct.imageUrl) {
+          <img [src]="externalProduct.imageUrl" [alt]="externalProduct.name" />
+        }
+        <div>
+          <span>Producto encontrado externamente</span>
+          <h3>{{ externalProduct.name }}</h3>
+          <p>{{ externalProduct.brand ?? 'Marca no informada' }}</p>
+          <dl>
+            <div>
+              <dt>Fuente externa</dt>
+              <dd>Open Food Facts</dd>
+            </div>
+            <div>
+              <dt>Precio</dt>
+              <dd>No disponible</dd>
+            </div>
+            <div>
+              <dt>Indice de sostenibilidad</dt>
+              <dd>No disponible</dd>
+            </div>
+          </dl>
+        </div>
+      </article>
+    }
+  </section>
 
   <form class="filters" aria-label="Filtros de productos" (submit)="$event.preventDefault()">
     <div class="field">

@@ -6,7 +6,7 @@ Plataforma de retail inteligente que ayuda a optimizar compras segun presupuesto
 
 LiquiVerde se desarrolla como una prueba tecnica full-stack para demostrar un flujo de compra inteligente, con foco en funcionalidad core, algoritmos, calidad de codigo y una arquitectura simple de mantener.
 
-Actualmente el frontend Angular permite navegar por home, catalogo y detalle basico de producto, consumiendo la API NestJS conectada a Supabase.
+Actualmente el frontend Angular permite navegar por home, catalogo, busqueda por barcode, detalle de producto con analisis visual de sostenibilidad, alternativas recomendadas y optimizador de compra, consumiendo la API NestJS conectada a Supabase.
 
 ## Stack tecnologico
 
@@ -48,6 +48,7 @@ Rutas principales:
 /
 /products
 /products/:id
+/optimizer
 ```
 
 Funcionalidad frontend disponible:
@@ -57,7 +58,20 @@ Funcionalidad frontend disponible:
 - Busqueda por nombre o marca.
 - Filtro por categoria.
 - Combinacion de busqueda y categoria.
-- Detalle basico con precio, categoria, tienda y atributos principales.
+- Busqueda por codigo de barras con fallback backend a Open Food Facts.
+- Detalle con precio, categoria, tienda, atributos principales y analisis visual de sostenibilidad.
+- Alternativas inteligentes en el detalle de producto, con ahorro o sobreprecio, mejora sostenible, carbono y motivo.
+- Optimizador de compra con presupuesto, categorias, cantidades y perfiles de prioridad.
+
+Los productos encontrados en Open Food Facts pueden tener informacion incompleta. El Sustainability Score solo esta disponible para productos locales con datos completos del dataset.
+
+El optimizador permite usar tres perfiles:
+
+- Ahorro: 80% precio, 20% sostenibilidad.
+- Equilibrado: 50% precio, 50% sostenibilidad.
+- Sustentable: 30% precio, 70% sostenibilidad.
+
+Muestra total de compra, ahorro estimado, presupuesto restante, indice sostenible promedio, utilidad economica promedio, utility promedio, carbono total, reduccion estimada de carbono y productos seleccionados.
 
 ## Ejecutar backend
 
@@ -141,6 +155,7 @@ GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
 GET /api/products/barcode/:barcode
 GET /api/products/:id/analysis
+GET /api/products/:id/alternatives
 GET /api/products/:id
 ```
 
@@ -172,6 +187,10 @@ Ejemplos usados por el frontend:
 GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
+GET /api/products/barcode/7800000000001
+GET /api/products/barcode/3017620422003
+GET /api/products/prod-milk-001/analysis
+GET /api/products/prod-milk-001/alternatives
 ```
 
 La API de productos es de solo lectura en esta etapa frontend.
@@ -218,6 +237,8 @@ El backend incluye optimizacion para listas de compra mediante:
 ```http
 POST /api/optimization
 ```
+
+El frontend consume este endpoint desde `/optimizer`.
 
 Request:
 
@@ -278,6 +299,80 @@ El motor calcula ahorro contra la combinacion mas cara disponible por grupo y re
 
 El endpoint carga productos reales desde Supabase, calcula dinamicamente el Sustainability Score de cada candidato con el motor de sostenibilidad y luego delega la seleccion al Optimization Engine. Los resultados no se persisten.
 
+## Algoritmo de Sustitucion Inteligente
+
+El backend expone recomendaciones de sustitucion mediante:
+
+```http
+GET /api/products/:id/alternatives
+```
+
+El endpoint solo trabaja con productos locales persistidos del dataset. Carga el producto origen, obtiene una vez todos los productos de la misma categoria con su tienda, calcula dinamicamente el Sustainability Score de cada producto usando el contexto completo de esa categoria y delega el ranking a un motor puro sin Prisma, HTTP ni llamadas externas.
+
+Regla de candidatos recomendables:
+
+```text
+Caso A: candidate.price < source.price
+        AND candidate.sustainabilityScore >= source.sustainabilityScore
+
+Caso B: candidate.sustainabilityScore > source.sustainabilityScore
+        AND candidate.price <= source.price * 1.15
+```
+
+Esto evita recomendar productos simultaneamente mas caros y menos sostenibles. El carbono no es un tercer objetivo del ranking porque ya influye en el Sustainability Score, pero se devuelve como metadata comparativa.
+
+Normalizacion economica:
+
+```text
+economicImprovementScore =
+  (candidateSavings - minSavings) / (maxSavings - minSavings) * 100
+```
+
+Si todos los ahorros recomendables son iguales, el score economico usa un valor neutral de `50`.
+
+Normalizacion sostenible:
+
+```text
+sustainabilityImprovementScore =
+  (candidateImprovement - minImprovement) / (maxImprovement - minImprovement) * 100
+```
+
+Si todas las mejoras sostenibles son iguales, el score sostenible usa `50`.
+
+Formula de ranking:
+
+```text
+recommendationScore =
+  economicImprovementScore * 0.40
+  + sustainabilityImprovementScore * 0.60
+```
+
+Tie-breaking determinista:
+
+```text
+recommendationScore DESC
+sustainabilityImprovement DESC
+savings DESC
+carbonKg ASC
+productId ASC
+```
+
+El endpoint retorna maximo 3 alternativas y no persiste recomendaciones.
+
+Ejemplos reales del dataset:
+
+- `prod-milk-001` recomienda `prod-milk-003`: cuesta `$170` mas, mejora `8.56` puntos de sostenibilidad y reduce `0.27 kg CO2e`.
+- `prod-milk-004` recomienda 3 alternativas; la primera es `prod-milk-003`, con ahorro de `$270`, mejora sostenible de `40.94` puntos y `recommendationScore` de `71.06`.
+- `prod-milk-003` no tiene sustitutos claramente mejores y retorna `recommendations: []`.
+
+## Algoritmos implementados
+
+LiquiVerde incluye tres algoritmos principales:
+
+1. Sustainability Scoring: indice determinista 0-100 por producto.
+2. Multi-objective Multiple Choice Knapsack: seleccion de una alternativa por necesidad bajo presupuesto.
+3. Intelligent Product Substitution: ranking de sustitutos por ahorro y mejora sostenible.
+
 ## Estado actual
 
 Fase 0 tecnica:
@@ -294,6 +389,9 @@ Fase 0 tecnica:
 - Analisis de sostenibilidad expuesto para productos locales.
 - Optimization Engine puro e integracion HTTP implementados en backend.
 - Frontend Angular P7.1 implementado con home, catalogo, busqueda, filtros y detalle basico.
+- Frontend Angular P7.2 implementado con analisis visual de sostenibilidad y busqueda por barcode.
+- Frontend Angular P8 implementado con optimizador de compra, presets, cantidades y resultados reales.
+- Fase P9 implementada con Recommendation Engine puro, endpoint `GET /api/products/:id/alternatives` y recomendaciones visibles en detalle.
 
 ## Plan del proyecto
 

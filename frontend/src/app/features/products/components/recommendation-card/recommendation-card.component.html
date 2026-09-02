@@ -1,0 +1,41 @@
+<article class="recommendation-card" data-testid="recommendation-card">
+  <div class="recommendation-card__header">
+    <p>{{ recommendation().product.brand ?? 'Marca no informada' }}</p>
+    <h3>{{ recommendation().product.name }}</h3>
+    <span>{{ recommendation().product.store.name }}</span>
+  </div>
+
+  <div class="recommendation-card__price">
+    <strong>{{ formatPrice(recommendation().product.price) }}</strong>
+    <span>{{ priceImpactLabel(recommendation().savings) }}</span>
+  </div>
+
+  <dl class="recommendation-card__metrics">
+    <div>
+      <dt>Impacto precio</dt>
+      <dd>{{ formatPriceImpact(recommendation().savings) }}</dd>
+    </div>
+    <div>
+      <dt>Sostenibilidad</dt>
+      <dd>{{ formatScore(recommendation().product.sustainabilityScore) }} / 100</dd>
+    </div>
+    <div>
+      <dt>Mejora sostenible</dt>
+      <dd>{{ formatSustainabilityImprovement(recommendation().sustainabilityImprovement) }}</dd>
+    </div>
+    <div>
+      <dt>Carbono</dt>
+      <dd>{{ formatCarbonDifference(recommendation().carbonDifferenceKg) }}</dd>
+    </div>
+  </dl>
+
+  <p class="recommendation-card__reason">{{ recommendation().reason }}</p>
+
+  <a
+    class="recommendation-card__link"
+    data-testid="recommendation-link"
+    [routerLink]="['/products', recommendation().product.id]"
+  >
+    Ver alternativa
+  </a>
+</article>

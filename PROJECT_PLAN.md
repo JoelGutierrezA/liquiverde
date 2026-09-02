@@ -201,6 +201,7 @@ Sustainability Score =
 
 ### Fase 10 - Docker, README final y cierre
 
+- Preparar monorepo para Vercel Services. Implementado en P10.1.
 - Agregar Docker y Docker Compose.
 - Completar README.
 - Documentar instalacion, variables, dataset, APIs, scoring, algoritmo, limitaciones y uso de IA.
@@ -411,6 +412,7 @@ Pendiente para fases posteriores:
 
 - Docker y Docker Compose
 - Dashboard e impacto
+- README final completo y cierre de P10
 
 ## 13. Siguiente paso concreto
 

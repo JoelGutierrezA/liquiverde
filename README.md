@@ -371,6 +371,57 @@ LiquiVerde incluye tres algoritmos principales:
 2. Multi-objective Multiple Choice Knapsack: seleccion de una alternativa por necesidad bajo presupuesto.
 3. Intelligent Product Substitution: ranking de sustitutos por ahorro y mejora sostenible.
 
+## Deployment
+
+LiquiVerde esta preparado para desplegarse manualmente en Vercel usando Services dentro de un unico proyecto:
+
+```text
+frontend/ -> Angular
+backend/  -> NestJS
+```
+
+La configuracion raiz `vercel.json` define dos servicios y enruta primero `/api/*` al backend. El catch-all restante va al frontend Angular, por lo que las rutas SPA como `/products`, `/products/prod-milk-001` y `/optimizer` quedan servidas por Angular.
+
+Rutas esperadas en produccion:
+
+```text
+/                               -> Angular
+/products                       -> Angular
+/products/:id                   -> Angular
+/optimizer                      -> Angular
+/api/health                     -> NestJS
+/api/products                   -> NestJS
+/api/products/:id/analysis      -> NestJS
+/api/products/:id/alternatives  -> NestJS
+/api/optimization               -> NestJS
+```
+
+El backend mantiene `app.setGlobalPrefix('api')`. Vercel Services entrega el path original al servicio backend, por ejemplo `/api/health`, por lo que no se configura un rewrite a `/api/api/*`.
+
+Variables del servicio backend:
+
+```text
+DATABASE_URL
+DIRECT_URL
+PORT
+FRONTEND_URL
+```
+
+En Vercel, `DATABASE_URL` debe configurarse manualmente y usar el Supabase Transaction Pooler en puerto `6543`. `DIRECT_URL` puede quedar disponible para Prisma CLI/migraciones, pero el runtime no ejecuta migraciones ni seed automaticamente. `FRONTEND_URL` solo es necesaria si se permite un frontend cross-origin; con `/api` same-origin no participa en las requests normales. `PORT` se mantiene para desarrollo local y Vercel normalmente lo entrega al runtime.
+
+El frontend usa `http://localhost:3000/api` en desarrollo local y `/api` fuera de localhost para funcionar same-origin en Vercel sin hardcodear la URL final.
+
+Flujo manual recomendado:
+
+1. Subir los cambios a GitHub.
+2. Importar el repositorio en Vercel.
+3. Seleccionar framework `Services` en el proyecto.
+4. Confirmar los servicios `frontend` y `backend`.
+5. Configurar las variables de entorno del backend sin secretos en el repo.
+6. Ejecutar deploy manual.
+7. Validar `/api/health`.
+8. Validar `/`, `/products`, `/products/prod-milk-001` y `/optimizer`.
+
 ## Estado actual
 
 Fase 0 tecnica:
@@ -390,6 +441,7 @@ Fase 0 tecnica:
 - Frontend Angular P7.2 implementado con analisis visual de sostenibilidad y busqueda por barcode.
 - Frontend Angular P8 implementado con optimizador de compra, presets, cantidades y resultados reales.
 - Fase P9 implementada con Recommendation Engine puro, endpoint `GET /api/products/:id/alternatives` y recomendaciones visibles en detalle.
+- Preparacion P10.1 para Vercel Services agregada sin ejecutar deploy.
 
 ## Plan del proyecto
 

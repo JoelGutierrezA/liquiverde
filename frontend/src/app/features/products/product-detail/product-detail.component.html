@@ -1,0 +1,71 @@
+<section class="detail" aria-labelledby="product-title">
+  <a routerLink="/products" class="back-link">Volver al catalogo</a>
+
+  @if (state() === 'loading') {
+    <p class="state" data-testid="product-detail-loading">Cargando producto...</p>
+  } @else if (state() === 'not-found') {
+    <div class="state" data-testid="product-not-found">
+      <h1>Producto no encontrado</h1>
+      <p>No encontramos un producto local con ese identificador.</p>
+      <a routerLink="/products">Volver al catalogo</a>
+    </div>
+  } @else if (state() === 'error') {
+    <div class="state state--error" role="alert">
+      <h1>No pudimos cargar el producto</h1>
+      <p>Intenta nuevamente en unos segundos.</p>
+      <button type="button" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (product(); as selectedProduct) {
+    <article class="detail-card" data-testid="product-detail">
+      <div class="detail-card__media">
+        @if (selectedProduct.imageUrl) {
+          <img [src]="selectedProduct.imageUrl" [alt]="selectedProduct.name" />
+        } @else {
+          <div class="detail-card__placeholder" aria-hidden="true">
+            <span>{{ selectedProduct.category.slice(0, 2).toUpperCase() }}</span>
+          </div>
+        }
+      </div>
+
+      <div class="detail-card__content">
+        <p class="eyebrow">{{ categoryLabel(selectedProduct.category) }}</p>
+        <h1 id="product-title">{{ selectedProduct.name }}</h1>
+        <p class="brand">{{ selectedProduct.brand ?? 'Marca no informada' }}</p>
+        <strong class="price">
+          {{ formatPrice(selectedProduct.price) }}
+        </strong>
+
+        @if (selectedProduct.description) {
+          <p class="description">{{ selectedProduct.description }}</p>
+        }
+
+        <dl class="facts">
+          <div>
+            <dt>Tienda</dt>
+            <dd>{{ selectedProduct.store?.name ?? 'No informada' }}</dd>
+          </div>
+          <div>
+            <dt>Huella de carbono</dt>
+            <dd>{{ selectedProduct.carbonKg }} kg CO2e</dd>
+          </div>
+          <div>
+            <dt>Producto local</dt>
+            <dd>{{ selectedProduct.localProduct ? 'Si' : 'No' }}</dd>
+          </div>
+          <div>
+            <dt>Envase reciclable</dt>
+            <dd>{{ selectedProduct.recyclablePackaging ? 'Si' : 'No' }}</dd>
+          </div>
+          <div>
+            <dt>Fair Trade</dt>
+            <dd>{{ selectedProduct.fairTrade ? 'Si' : 'No' }}</dd>
+          </div>
+          <div>
+            <dt>Indicador social base</dt>
+            <dd>{{ selectedProduct.socialScore }}/100</dd>
+          </div>
+        </dl>
+      </div>
+    </article>
+  }
+</section>

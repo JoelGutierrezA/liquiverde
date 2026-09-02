@@ -1,0 +1,173 @@
+.detail {
+  width: min(100% - 2rem, 1080px);
+  margin: 0 auto;
+  padding: 2rem 0 4rem;
+}
+
+.back-link,
+.state a {
+  display: inline-flex;
+  min-height: 40px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #e7f1ea;
+  color: #1e6044;
+  font-weight: 800;
+  padding: 0.55rem 0.8rem;
+  text-decoration: none;
+}
+
+.back-link {
+  margin-bottom: 1rem;
+}
+
+.back-link:focus-visible,
+.state a:focus-visible,
+button:focus-visible {
+  outline: 3px solid #f4c84a;
+  outline-offset: 2px;
+}
+
+.detail-card {
+  display: grid;
+  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  gap: 1.5rem;
+  border: 1px solid #dce5df;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1rem;
+  box-shadow: 0 14px 34px rgba(25, 54, 42, 0.08);
+}
+
+.detail-card__media {
+  overflow: hidden;
+  border-radius: 8px;
+  background: #eef4ef;
+}
+
+.detail-card__media img,
+.detail-card__placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+}
+
+.detail-card__media img {
+  display: block;
+  object-fit: cover;
+}
+
+.detail-card__placeholder {
+  display: grid;
+  place-items: center;
+  color: #1f6b4a;
+}
+
+.detail-card__placeholder span {
+  display: grid;
+  width: 6rem;
+  height: 6rem;
+  place-items: center;
+  border: 2px solid #cfe2d5;
+  border-radius: 50%;
+  background: #f8fbf8;
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.detail-card__content {
+  display: grid;
+  align-content: start;
+  gap: 0.85rem;
+  padding: 0.5rem;
+}
+
+.eyebrow {
+  margin: 0;
+  color: #26704d;
+  font-size: 0.8rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  color: #173428;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.08;
+}
+
+.brand,
+.description {
+  margin: 0;
+  color: #52645c;
+  line-height: 1.6;
+}
+
+.price {
+  color: #123626;
+  font-size: 1.7rem;
+}
+
+.facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin: 0;
+}
+
+.facts div {
+  border: 1px solid #e0e8e3;
+  border-radius: 8px;
+  background: #fbfdfb;
+  padding: 0.85rem;
+}
+
+dt {
+  color: #607267;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+dd {
+  margin: 0.25rem 0 0;
+  color: #1f3328;
+  font-weight: 800;
+}
+
+.state {
+  border: 1px dashed #b9c9c0;
+  border-radius: 8px;
+  background: #fff;
+  color: #52645c;
+  padding: 2rem;
+  text-align: center;
+}
+
+.state h1 {
+  font-size: 2rem;
+}
+
+.state--error {
+  border-color: #dfb3a5;
+  color: #7c3825;
+}
+
+button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  background: #e7f1ea;
+  color: #1e6044;
+  cursor: pointer;
+  font-weight: 800;
+  padding: 0.55rem 0.8rem;
+}
+
+@media (max-width: 760px) {
+  .detail-card,
+  .facts {
+    grid-template-columns: 1fr;
+  }
+}

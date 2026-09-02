@@ -9,6 +9,8 @@ body {
 }
 
 body {
+  background: #f7faf6;
+  color: #173428;
   font-family:
     Inter,
     ui-sans-serif,
@@ -17,4 +19,14 @@ body {
     BlinkMacSystemFont,
     "Segoe UI",
     sans-serif;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  appearance: none;
 }

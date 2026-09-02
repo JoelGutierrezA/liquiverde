@@ -4,9 +4,9 @@ Plataforma de retail inteligente que ayuda a optimizar compras segun presupuesto
 
 ## Objetivo
 
-LiquiVerde se desarrollara como una prueba tecnica full-stack para demostrar un flujo de compra inteligente, con foco en funcionalidad core, algoritmos, calidad de codigo y una arquitectura simple de mantener.
+LiquiVerde se desarrolla como una prueba tecnica full-stack para demostrar un flujo de compra inteligente, con foco en funcionalidad core, algoritmos, calidad de codigo y una arquitectura simple de mantener.
 
-En esta fase el proyecto solo contiene la base tecnica de frontend y backend. Los modulos de negocio, Prisma, Supabase, dataset, algoritmos e integraciones externas se implementaran en fases posteriores.
+Actualmente el frontend Angular permite navegar por home, catalogo y detalle basico de producto, consumiendo la API NestJS conectada a Supabase.
 
 ## Stack tecnologico
 
@@ -32,6 +32,8 @@ liquiverde/
 
 ## Ejecutar frontend
 
+El catalogo Angular consume el backend local en `http://localhost:3000/api`, por lo que primero debe estar ejecutandose la API NestJS.
+
 ```bash
 cd frontend
 npm install
@@ -39,6 +41,23 @@ npm start
 ```
 
 La aplicacion Angular queda disponible por defecto en `http://localhost:4200`.
+
+Rutas principales:
+
+```text
+/
+/products
+/products/:id
+```
+
+Funcionalidad frontend disponible:
+
+- Home con CTA hacia el catalogo.
+- Catalogo con 50 productos del dataset.
+- Busqueda por nombre o marca.
+- Filtro por categoria.
+- Combinacion de busqueda y categoria.
+- Detalle basico con precio, categoria, tienda y atributos principales.
 
 ## Ejecutar backend
 
@@ -60,7 +79,8 @@ Respuesta esperada:
 
 ```json
 {
-  "status": "ok"
+  "status": "ok",
+  "database": "connected"
 }
 ```
 
@@ -146,7 +166,15 @@ Query params opcionales:
 - `search`: busca por `name` o `brand`.
 - `category`: filtra por categoria exacta.
 
-La API de productos es de solo lectura en esta etapa. Sostenibilidad y optimizacion se implementaran en fases posteriores.
+Ejemplos usados por el frontend:
+
+```http
+GET /api/products?search=leche
+GET /api/products?category=milk
+GET /api/products?search=entera&category=milk
+```
+
+La API de productos es de solo lectura en esta etapa frontend.
 
 La busqueda por barcode consulta primero Supabase. Si el producto no existe localmente, el backend consulta Open Food Facts como fallback con timeout externo de 5000 ms, solicita solo los campos necesarios y retorna una respuesta normalizada con `source: "open_food_facts"`. Los errores externos se responden con mensajes genericos sin exponer detalles internos, y los productos externos pueden incluir campos `null` porque no se persisten en la base de datos.
 
@@ -264,7 +292,8 @@ Fase 0 tecnica:
 - Dataset controlado inicial creado.
 - API Products base de solo lectura creada con busqueda y filtro por categoria.
 - Analisis de sostenibilidad expuesto para productos locales.
-- Optimization Engine puro implementado sin endpoint HTTP.
+- Optimization Engine puro e integracion HTTP implementados en backend.
+- Frontend Angular P7.1 implementado con home, catalogo, busqueda, filtros y detalle basico.
 
 ## Plan del proyecto
 

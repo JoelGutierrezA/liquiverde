@@ -165,9 +165,9 @@ Sustainability Score =
 
 ### Fase 5 - Frontend catalogo y detalle
 
-- Crear rutas `/`, `/products` y `/products/:id`.
-- Consumir API NestJS mediante servicios Angular.
-- Crear UI responsive y demostrable.
+- Crear rutas `/`, `/products` y `/products/:id`. Implementado en P7.1.
+- Consumir API NestJS mediante servicios Angular. Implementado en P7.1.
+- Crear UI responsive y demostrable. Implementado en P7.1.
 
 ### Fase 6 - Optimization Engine
 
@@ -261,12 +261,17 @@ El contrato podra refinarse durante la implementacion.
 
 ## 8. Frontend objetivo inicial
 
-Rutas iniciales:
+Rutas implementadas en P7.1:
 
 ```text
 /
 /products
 /products/:id
+```
+
+Ruta posterior:
+
+```text
 /optimizer
 ```
 
@@ -384,7 +389,7 @@ Recomendacion:
 
 ## 12. Estado actual del repositorio
 
-Fase 0 tecnica implementada. La estructura base actual es:
+Fases tecnicas hasta P7.1 implementadas. La estructura base actual es:
 
 ```text
 liquiverde/
@@ -400,16 +405,17 @@ liquiverde/
 Pendiente para fases posteriores:
 
 - Docker y Docker Compose
-- API Products avanzada: mejoras de busqueda y filtros si son requeridas
-- modulos funcionales de analisis y optimizacion
-- integraciones externas
+- Frontend avanzado de sostenibilidad
+- Frontend del optimizador
+- Recomendaciones y sustitucion inteligente
+- Dashboard e impacto
 
 ## 13. Siguiente paso concreto
 
 El siguiente paso recomendado es continuar con la siguiente fase solicitada:
 
 1. Mantener Recommendations fuera hasta su fase.
-2. Conectar frontend al catalogo y detalle solo si se define P7.
-3. Agregar validaciones o tests adicionales si el contrato de API crece.
+2. Implementar P7.2 solo cuando se quiera mostrar el analisis visual de sostenibilidad en el frontend.
+3. Mantener el optimizador frontend para P8.
 
-No se debe crear todavia ningun modulo funcional de Products, Sustainability, Optimization ni integraciones externas hasta recibir la instruccion correspondiente.
+No se debe crear todavia UI de barcode, optimizador, recomendaciones, dashboard ni mapas hasta recibir la instruccion correspondiente.

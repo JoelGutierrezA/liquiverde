@@ -1,0 +1,116 @@
+.hero {
+  display: grid;
+  min-height: min(72vh, 680px);
+  align-items: center;
+  padding: clamp(3rem, 8vw, 6rem) 0;
+  background:
+    linear-gradient(110deg, rgba(15, 92, 76, 0.92), rgba(38, 79, 68, 0.62)),
+    linear-gradient(45deg, #dceee5 0 25%, #f7f1df 25% 50%, #d8e8ed 50% 75%, #f5f7ef 75%);
+  background-size: auto, 28px 28px;
+  color: #fff;
+}
+
+.hero__content {
+  width: min(100% - 2rem, 920px);
+  margin: 0 auto;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: #d9f2db;
+  font-size: 0.875rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(3rem, 8vw, 6rem);
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.hero__tagline {
+  margin: 1rem 0 0;
+  max-width: 760px;
+  font-size: clamp(1.6rem, 4vw, 3rem);
+  font-weight: 800;
+  line-height: 1.08;
+}
+
+.hero__copy {
+  max-width: 620px;
+  margin: 1.25rem 0 2rem;
+  color: #eef8f1;
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.primary-action {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #f4c84a;
+  color: #173428;
+  font-weight: 800;
+  padding: 0.8rem 1.15rem;
+  text-decoration: none;
+}
+
+.primary-action:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 3px;
+}
+
+.benefits {
+  display: grid;
+  width: min(100% - 2rem, 1120px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 2rem auto 4rem;
+}
+
+.benefits article {
+  border: 1px solid #d8e4dc;
+  border-radius: 8px;
+  background: #fff;
+  padding: 1.25rem;
+}
+
+.benefits span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.75rem;
+  min-height: 2rem;
+  border-radius: 999px;
+  background: #e8f3ec;
+  color: #1f6b4a;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.benefits h2 {
+  margin: 1rem 0 0.4rem;
+  color: #173428;
+  font-size: 1.1rem;
+}
+
+.benefits p {
+  margin: 0;
+  color: #52645c;
+  line-height: 1.6;
+}
+
+@media (max-width: 760px) {
+  .hero {
+    min-height: auto;
+  }
+
+  .benefits {
+    grid-template-columns: 1fr;
+  }
+}

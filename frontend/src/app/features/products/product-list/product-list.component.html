@@ -1,0 +1,61 @@
+<section class="catalog" aria-labelledby="products-title">
+  <header class="catalog__header">
+    <div>
+      <p class="eyebrow">Catalogo</p>
+      <h1 id="products-title">Explora productos</h1>
+      <p>Busca por nombre o marca, filtra por categoria y compara alternativas disponibles.</p>
+    </div>
+    <p class="catalog__count" data-testid="products-count">
+      {{ products().length }} productos
+    </p>
+  </header>
+
+  <form class="filters" aria-label="Filtros de productos" (submit)="$event.preventDefault()">
+    <div class="field">
+      <label for="product-search">Buscar por nombre o marca</label>
+      <input
+        id="product-search"
+        type="search"
+        [formControl]="searchControl"
+        placeholder="Ej: leche, familiar, arroz"
+      />
+    </div>
+
+    <div class="field">
+      <label for="product-category">Categoria</label>
+      <select
+        id="product-category"
+        [value]="selectedCategory()"
+        #categorySelect
+        (change)="setCategory(categorySelect.value)"
+      >
+        <option value="">Todas</option>
+        @for (category of categories; track category.value) {
+          <option [value]="category.value">{{ category.label }}</option>
+        }
+      </select>
+    </div>
+
+    <button type="button" class="secondary-action" (click)="clearFilters()">Limpiar filtros</button>
+  </form>
+
+  @if (loading()) {
+    <p class="state" data-testid="products-loading">Cargando productos...</p>
+  } @else if (error()) {
+    <div class="state state--error" role="alert">
+      <p>No pudimos cargar los productos.</p>
+      <button type="button" (click)="retry()">Reintentar</button>
+    </div>
+  } @else if (products().length === 0) {
+    <div class="state" data-testid="products-empty">
+      <p>No encontramos productos con esos filtros.</p>
+      <button type="button" (click)="clearFilters()">Limpiar filtros</button>
+    </div>
+  } @else {
+    <div class="products-grid" data-testid="products-grid">
+      @for (product of products(); track product.id ?? product.barcode) {
+        <app-product-card [product]="product" />
+      }
+    </div>
+  }
+</section>

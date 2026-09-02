@@ -1,0 +1,43 @@
+<article class="product-card" data-testid="product-card">
+  <div class="product-card__media">
+    @if (product().imageUrl) {
+      <img [src]="product().imageUrl" [alt]="product().name" loading="lazy" />
+    } @else {
+      <div class="product-card__placeholder" aria-hidden="true">
+        <span>{{ product().category.slice(0, 2).toUpperCase() }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="product-card__body">
+    <div class="product-card__meta">
+      <span>{{ categoryLabel(product().category) }}</span>
+      @if (product().store) {
+        <span>{{ product().store?.name }}</span>
+      }
+    </div>
+
+    <h2>{{ product().name }}</h2>
+    <p class="product-card__brand">{{ product().brand ?? 'Marca no informada' }}</p>
+
+    <div class="product-card__footer">
+      <strong>{{ formatPrice(product().price) }}</strong>
+
+      @if (product().id) {
+        <a [routerLink]="['/products', product().id]" class="detail-link">Ver detalle</a>
+      }
+    </div>
+
+    <div class="badges" aria-label="Atributos del producto">
+      @if (product().localProduct) {
+        <span>Producto local</span>
+      }
+      @if (product().recyclablePackaging) {
+        <span>Envase reciclable</span>
+      }
+      @if (product().fairTrade) {
+        <span>Fair Trade</span>
+      }
+    </div>
+  </div>
+</article>

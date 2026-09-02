@@ -1,39 +1,70 @@
-.home {
-  min-height: 100vh;
-  display: grid;
-  place-items: center;
-  padding: 2rem;
-  background:
-    linear-gradient(135deg, rgba(32, 122, 69, 0.08), rgba(24, 86, 116, 0.1)),
-    #f7faf6;
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  min-height: 64px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid #dce5df;
+  background: rgba(250, 252, 248, 0.94);
+  padding: 0 1.25rem;
+  backdrop-filter: blur(12px);
+}
+
+.brand {
   color: #173428;
-}
-
-.intro {
-  width: min(100%, 720px);
-  text-align: center;
-}
-
-.eyebrow {
-  margin: 0 0 0.75rem;
-  color: #27714c;
-  font-size: 0.875rem;
-  font-weight: 700;
+  font-size: 1.2rem;
+  font-weight: 900;
   letter-spacing: 0;
-  text-transform: uppercase;
+  text-decoration: none;
 }
 
-h1 {
-  margin: 0;
-  font-size: clamp(2.5rem, 8vw, 5.5rem);
-  line-height: 1;
-  letter-spacing: 0;
+nav {
+  display: flex;
+  gap: 0.35rem;
 }
 
-.tagline {
-  margin: 1rem auto 0;
-  max-width: 36rem;
+nav a {
+  min-height: 40px;
+  border-radius: 8px;
   color: #40584c;
-  font-size: clamp(1.125rem, 3vw, 1.5rem);
-  line-height: 1.5;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 0.8rem;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+nav a.is-active,
+nav a:hover {
+  background: #e7f1ea;
+  color: #1f6b4a;
+}
+
+a:focus-visible {
+  outline: 3px solid #f4c84a;
+  outline-offset: 2px;
+}
+
+main {
+  min-height: calc(100vh - 64px);
+}
+
+@media (max-width: 520px) {
+  .site-header {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 0.75rem 1rem;
+  }
+
+  nav {
+    width: 100%;
+  }
+
+  nav a {
+    flex: 1;
+    justify-content: center;
+  }
 }

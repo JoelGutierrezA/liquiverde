@@ -135,7 +135,7 @@ Separacion esperada por modulo:
 ### Fase 2 - API Products y busqueda
 
 - Implementar endpoints base de productos. Implementado con `GET /api/products` y `GET /api/products/:id`.
-- Buscar por texto, categoria, id y barcode local. Implementado parcialmente con `search` y `category`; pendiente barcode local.
+- Buscar por texto, categoria, id y barcode local. Implementado con `search`, `category` y `barcode`.
 - Mantener logica de negocio fuera de controllers.
 
 ### Fase 3 - Integracion Open Food Facts
@@ -144,6 +144,7 @@ Separacion esperada por modulo:
 - Consultar Open Food Facts solo desde backend.
 - Normalizar respuesta externa al modelo interno.
 - Manejar inexistencia, timeout y errores externos.
+- Fallback por barcode implementado sin persistir productos externos.
 
 ### Fase 4 - Sustainability Engine
 
@@ -397,16 +398,16 @@ liquiverde/
 Pendiente para fases posteriores:
 
 - Docker y Docker Compose
-- API Products avanzada: busqueda, filtros y barcode local
+- API Products avanzada: mejoras de busqueda y filtros si son requeridas
 - modulos funcionales de analisis y optimizacion
 - integraciones externas
 
 ## 13. Siguiente paso concreto
 
-El siguiente paso recomendado es continuar Fase 2:
+El siguiente paso recomendado es continuar con la siguiente fase solicitada:
 
-1. Implementar busqueda por barcode local.
-2. Mantener Open Food Facts fuera hasta la fase de integracion.
+1. Robustecer manejo de errores externos si se define P4.2.
+2. Mantener Sustainability, Optimization y Recommendations fuera hasta sus fases.
 3. Agregar validaciones o tests adicionales si el contrato de API crece.
 
 No se debe crear todavia ningun modulo funcional de Products, Sustainability, Optimization ni integraciones externas hasta recibir la instruccion correspondiente.

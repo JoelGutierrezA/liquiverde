@@ -60,7 +60,10 @@ GET /api/products
 GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
+GET /api/products/barcode/:barcode
 GET /api/products/:id
 ```
 
 La respuesta incluye informacion basica del producto y de su tienda asociada. `search` busca por nombre o marca, y `category` filtra por categoria exacta. La API es de solo lectura en esta fase.
+
+`GET /api/products/barcode/:barcode` busca primero en la base local. Si no hay coincidencia, consulta Open Food Facts desde el backend y normaliza la respuesta sin persistir el producto externo.

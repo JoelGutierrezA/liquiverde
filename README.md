@@ -119,6 +119,7 @@ GET /api/products
 GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
+GET /api/products/barcode/:barcode
 GET /api/products/:id
 ```
 
@@ -144,7 +145,9 @@ Query params opcionales:
 - `search`: busca por `name` o `brand`.
 - `category`: filtra por categoria exacta.
 
-La API de productos es de solo lectura en esta etapa. Barcode externo, sostenibilidad y optimizacion se implementaran en fases posteriores.
+La API de productos es de solo lectura en esta etapa. Sostenibilidad y optimizacion se implementaran en fases posteriores.
+
+La busqueda por barcode consulta primero Supabase. Si el producto no existe localmente, el backend consulta Open Food Facts y retorna una respuesta normalizada con `source: "open_food_facts"`. Los productos externos pueden incluir campos `null` y no se persisten en la base de datos.
 
 ## Estado actual
 

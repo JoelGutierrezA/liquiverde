@@ -11,6 +11,15 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @Get('barcode/:barcode')
+  findByBarcode(@Param('barcode') barcode: string) {
+    if (!/^\d{8,14}$/.test(barcode)) {
+      throw new BadRequestException('Barcode is invalid.');
+    }
+
+    return this.productsService.findByBarcode(barcode);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     if (!/^[a-zA-Z0-9_-]+$/.test(id)) {

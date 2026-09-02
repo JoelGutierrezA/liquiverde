@@ -1,5 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { OpenFoodFactsService } from '../integrations/open-food-facts/open-food-facts.service';
+import { NormalizedOpenFoodFactsProduct } from '../integrations/open-food-facts/types/open-food-facts-product.type';
 import { PrismaService } from '../prisma/prisma.service';
 import { FindProductsQueryDto } from './dto/find-products-query.dto';
 
@@ -32,7 +34,10 @@ export type ProductResponse = Prisma.ProductGetPayload<{
 
 @Injectable()
 export class ProductsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly openFoodFactsService: OpenFoodFactsService,
+  ) {}
 
   async findAll(filters: FindProductsQueryDto = {}): Promise<ProductResponse[]> {
     try {
@@ -65,6 +70,29 @@ export class ProductsService {
 
       throw new InternalServerErrorException('Could not retrieve product.');
     }
+  }
+
+  async findByBarcode(barcode: string): Promise<ProductResponse | NormalizedOpenFoodFactsProduct> {
+    try {
+      const localProduct = await this.prisma.product.findUnique({
+        where: { barcode },
+        select: productSelect,
+      });
+
+      if (localProduct) {
+        return localProduct;
+      }
+    } catch {
+      throw new InternalServerErrorException('Could not retrieve product.');
+    }
+
+    const externalProduct = await this.openFoodFactsService.findByBarcode(barcode);
+
+    if (!externalProduct) {
+      throw new NotFoundException('Product was not found.');
+    }
+
+    return externalProduct;
   }
 
   private buildWhere(filters: FindProductsQueryDto): Prisma.ProductWhereInput {

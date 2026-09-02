@@ -1,5 +1,6 @@
 import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { OpenFoodFactsService } from '../integrations/open-food-facts/open-food-facts.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ProductsService } from './products.service';
 
@@ -32,6 +33,9 @@ describe('ProductsService', () => {
       findUnique: jest.fn(),
     },
   };
+  const openFoodFactsMock = {
+    findByBarcode: jest.fn(),
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -42,6 +46,10 @@ describe('ProductsService', () => {
         {
           provide: PrismaService,
           useValue: prismaMock,
+        },
+        {
+          provide: OpenFoodFactsService,
+          useValue: openFoodFactsMock,
         },
       ],
     }).compile();
@@ -149,6 +157,51 @@ describe('ProductsService', () => {
     prismaMock.product.findUnique.mockResolvedValue(null);
 
     await expect(service.findOne('missing-product')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('findByBarcode returns a local product without calling Open Food Facts', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(product);
+
+    await expect(service.findByBarcode('7800000000001')).resolves.toEqual(product);
+    expect(prismaMock.product.findUnique).toHaveBeenCalledWith({
+      where: { barcode: '7800000000001' },
+      select: expect.objectContaining({
+        barcode: true,
+        store: { select: { id: true, name: true } },
+      }),
+    });
+    expect(openFoodFactsMock.findByBarcode).not.toHaveBeenCalled();
+  });
+
+  it('findByBarcode calls Open Food Facts when product is not found locally', async () => {
+    const externalProduct = {
+      barcode: '3017620422003',
+      name: 'External product',
+      brand: 'External brand',
+      category: 'unknown',
+      description: null,
+      imageUrl: null,
+      price: null,
+      carbonKg: null,
+      localProduct: null,
+      recyclablePackaging: null,
+      fairTrade: null,
+      socialScore: null,
+      source: 'open_food_facts',
+      store: null,
+    };
+    prismaMock.product.findUnique.mockResolvedValue(null);
+    openFoodFactsMock.findByBarcode.mockResolvedValue(externalProduct);
+
+    await expect(service.findByBarcode('3017620422003')).resolves.toEqual(externalProduct);
+    expect(openFoodFactsMock.findByBarcode).toHaveBeenCalledWith('3017620422003');
+  });
+
+  it('findByBarcode throws NotFoundException when product is not found locally or externally', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(null);
+    openFoodFactsMock.findByBarcode.mockResolvedValue(null);
+
+    await expect(service.findByBarcode('1234567890123')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('findAll hides unexpected database errors', async () => {

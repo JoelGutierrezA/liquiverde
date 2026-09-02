@@ -7,7 +7,9 @@
     },
     "backend": {
       "root": "backend/",
-      "framework": "nestjs"
+      "framework": "nestjs",
+      "installCommand": "npm ci",
+      "buildCommand": "npm run build"
     }
   },
   "rewrites": [

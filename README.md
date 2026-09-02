@@ -1,95 +1,123 @@
 # LiquiVerde
 
-Plataforma de retail inteligente que ayuda a optimizar compras segun presupuesto, ahorro y sostenibilidad.
+LiquiVerde es una prueba tecnica full-stack para explorar compras de supermercado con criterios de precio, sostenibilidad y optimizacion de presupuesto.
 
 ## Objetivo
 
-LiquiVerde se desarrolla como una prueba tecnica full-stack para demostrar un flujo de compra inteligente, con foco en funcionalidad core, algoritmos, calidad de codigo y una arquitectura simple de mantener.
+El proyecto implementa una experiencia local donde una persona puede revisar un catalogo de productos, buscar por texto o codigo de barras, analizar sostenibilidad por producto, recibir alternativas inteligentes y optimizar una lista de compra bajo un presupuesto.
 
-Actualmente el frontend Angular permite navegar por home, catalogo, busqueda por barcode, detalle de producto con analisis visual de sostenibilidad, alternativas recomendadas y optimizador de compra, consumiendo la API NestJS conectada a Supabase.
+La entrega prioriza funcionalidad core, algoritmos deterministas, integracion real con base de datos y una arquitectura simple:
+
+```text
+Frontend Angular -> API NestJS -> Prisma ORM -> Supabase PostgreSQL
+```
+
+La busqueda externa por barcode usa Open Food Facts solo como fallback cuando el producto no existe en el dataset local.
 
 ## Stack tecnologico
 
-- Frontend: Angular, TypeScript, standalone components, Angular Router, Reactive Forms, HttpClient.
-- Backend: Node.js, NestJS, TypeScript, REST API.
-- Persistencia: PostgreSQL alojado en Supabase mediante Prisma ORM.
-- Deploy futuro: Vercel.
+- Frontend: Angular 20, TypeScript, standalone components, Angular Router, Reactive Forms, HttpClient y SCSS.
+- Backend: Node.js, NestJS 11, TypeScript y REST API.
+- ORM: Prisma con Prisma Client.
+- Base de datos: PostgreSQL en Supabase.
+- API externa: Open Food Facts para fallback de barcode.
+- Testing: Jest en backend; Karma/Jasmine en frontend.
 
-## Arquitectura general
+## Arquitectura
 
-El repositorio usa un monorepo simple con dos proyectos Node independientes:
+El backend mantiene una arquitectura por capas:
+
+```text
+Controller -> Application/Service -> PrismaService -> Supabase
+```
+
+Los motores de negocio se mantienen puros cuando aplica:
+
+- `SustainabilityService`: calcula scores sin depender de Prisma ni HTTP.
+- `OptimizationService`: resuelve la seleccion bajo presupuesto sin acceder a infraestructura.
+- `RecommendationEngineService`: rankea sustitutos sin persistencia ni llamadas externas.
+
+El frontend consume la API mediante servicios Angular centralizados y presenta la funcionalidad en rutas independientes.
+
+## Estructura del repositorio
 
 ```text
 liquiverde/
-+-- frontend/
 +-- backend/
+|   +-- prisma/
+|   |   +-- migrations/
+|   |   +-- schema.prisma
+|   |   +-- seed.ts
+|   +-- src/
+|       +-- integrations/open-food-facts/
+|       +-- optimization/
+|       +-- prisma/
+|       +-- products/
+|       +-- recommendations/
+|       +-- sustainability/
 +-- dataset/
+|   +-- products.json
+|   +-- stores.json
++-- frontend/
+|   +-- src/app/
+|       +-- core/
+|       +-- features/
 +-- PROJECT_PLAN.md
 +-- README.md
 +-- .env.example
 +-- .gitignore
 ```
 
-## Ejecutar frontend
+## Requisitos previos
 
-El catalogo Angular consume el backend local en `http://localhost:3000/api`, por lo que primero debe estar ejecutandose la API NestJS.
+- Node.js 20 o superior.
+- npm.
+- Acceso a una base PostgreSQL compatible con Prisma.
+- Variables de entorno configuradas para el backend.
 
-```bash
-cd frontend
-npm install
-npm start
+## Variables de entorno
+
+Usa `.env.example` como referencia. El archivo `.env` real debe vivir en la raiz del repositorio y no debe versionarse.
+
+Variables principales del backend:
+
+```env
+DATABASE_URL=
+DIRECT_URL=
+PORT=3000
+FRONTEND_URL=http://localhost:4200
 ```
 
-La aplicacion Angular queda disponible por defecto en `http://localhost:4200`.
+- `DATABASE_URL`: URL usada por Prisma Client en runtime.
+- `DIRECT_URL`: URL usada por Prisma para migraciones.
+- `PORT`: puerto local del backend.
+- `FRONTEND_URL`: origen permitido para CORS en desarrollo local.
 
-Rutas principales:
+No incluir credenciales reales en archivos versionados, issues, capturas ni logs.
 
-```text
-/
-/products
-/products/:id
-/optimizer
-```
+## Instalacion del backend
 
-Funcionalidad frontend disponible:
-
-- Home con CTA hacia el catalogo.
-- Catalogo con 50 productos del dataset.
-- Busqueda por nombre o marca.
-- Filtro por categoria.
-- Combinacion de busqueda y categoria.
-- Busqueda por codigo de barras con fallback backend a Open Food Facts.
-- Detalle con precio, categoria, tienda, atributos principales y analisis visual de sostenibilidad.
-- Alternativas inteligentes en el detalle de producto, con ahorro o sobreprecio, mejora sostenible, carbono y motivo.
-- Optimizador de compra con presupuesto, categorias, cantidades y perfiles de prioridad.
-
-Los productos encontrados en Open Food Facts pueden tener informacion incompleta. El Sustainability Score solo esta disponible para productos locales con datos completos del dataset.
-
-El optimizador permite usar tres perfiles:
-
-- Ahorro: 80% precio, 20% sostenibilidad.
-- Equilibrado: 50% precio, 50% sostenibilidad.
-- Sustentable: 30% precio, 70% sostenibilidad.
-
-Muestra total de compra, ahorro estimado, presupuesto restante, indice sostenible promedio, utilidad economica promedio, utility promedio, carbono total, reduccion estimada de carbono y productos seleccionados.
-
-## Ejecutar backend
+Desde `backend/`:
 
 ```bash
-cd backend
 npm install
+npm run build
 npm run start:dev
 ```
 
-La API NestJS queda disponible por defecto en `http://localhost:3000/api`.
+La API queda disponible por defecto en:
+
+```text
+http://localhost:3000/api
+```
 
 Health check:
 
-```text
+```http
 GET /api/health
 ```
 
-Respuesta esperada:
+Respuesta esperada cuando la base de datos responde:
 
 ```json
 {
@@ -98,34 +126,14 @@ Respuesta esperada:
 }
 ```
 
-## Variables de entorno
+## Base de datos y Prisma
 
-Usa `.env.example` como referencia. No se debe versionar ningun archivo `.env` real.
+El schema Prisma define dos modelos principales:
 
-Para conectar el backend con Supabase, configura estas variables en el entorno local o de deploy:
+- `Store`: tienda ficticia con nombre y coordenadas.
+- `Product`: producto con barcode, precio, categoria, huella de carbono, atributos sostenibles y relacion con tienda.
 
-- `DATABASE_URL`: connection string principal usada por Prisma Client.
-- `DIRECT_URL`: connection string usada por Prisma para operaciones de migracion.
-
-Para Supabase, `DATABASE_URL` usa el Shared Transaction Pooler y `DIRECT_URL` usa el Shared Session Pooler para migraciones en entornos IPv4.
-
-## Base de datos y dataset
-
-El schema inicial de Prisma define:
-
-- `Store`: tiendas ficticias con coordenadas en Santiago de Chile.
-- `Product`: productos con precio en CLP, categoria, atributos demostrativos de sostenibilidad y relacion con tienda.
-
-El dataset controlado vive en:
-
-- `dataset/stores.json`
-- `dataset/products.json`
-
-Incluye 5 tiendas ficticias y 50 productos distribuidos en 10 categorias. Los precios, huella de carbono y atributos sociales/ambientales son datos demostrativos, no mediciones oficiales.
-
-## Migraciones y seed
-
-Desde `backend/`:
+Comandos utiles desde `backend/`:
 
 ```bash
 npm run prisma:validate
@@ -134,30 +142,112 @@ npm run prisma:migrate
 npm run prisma:seed
 ```
 
+Para aplicar migraciones existentes en un entorno ya preparado puede usarse:
+
+```bash
+npx prisma migrate deploy
+```
+
 El seed es idempotente: usa `upsert` para tiendas por `id` y productos por `barcode`.
 
-## API disponible
+## Instalacion del frontend
 
-Health check:
+Desde `frontend/`:
+
+```bash
+npm install
+npm start
+```
+
+La aplicacion Angular queda disponible por defecto en:
+
+```text
+http://localhost:4200
+```
+
+En desarrollo, el frontend consume:
+
+```text
+http://localhost:3000/api
+```
+
+## Quick Start
+
+1. Configurar `.env` en la raiz del repositorio usando `.env.example` como guia.
+2. Instalar dependencias del backend:
+
+```bash
+cd backend
+npm install
+npm run prisma:generate
+npm run prisma:migrate
+npm run prisma:seed
+npm run start:dev
+```
+
+3. En otra terminal, iniciar el frontend:
+
+```bash
+cd frontend
+npm install
+npm start
+```
+
+4. Abrir `http://localhost:4200`.
+
+## Dataset
+
+El dataset controlado esta en `dataset/`:
+
+- `stores.json`: 5 tiendas ficticias.
+- `products.json`: 50 productos.
+
+Categorias incluidas:
+
+```text
+bread
+cereal
+cleaning
+eggs
+legumes
+milk
+pasta
+rice
+snacks
+yogurt
+```
+
+Los precios, huella de carbono y atributos sociales/ambientales son datos demostrativos para la prueba tecnica. No representan mediciones oficiales.
+
+## API principal
+
+Todos los endpoints usan el prefijo global `/api`.
+
+### Health
 
 ```http
 GET /api/health
 ```
 
-Productos:
+### Productos
 
 ```http
 GET /api/products
 GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
-GET /api/products/barcode/:barcode
+GET /api/products/:id
 GET /api/products/:id/analysis
 GET /api/products/:id/alternatives
-GET /api/products/:id
+GET /api/products/barcode/:barcode
 ```
 
-Ejemplo de respuesta para un producto:
+Query params opcionales en `GET /api/products`:
+
+- `search`: busca por `name` o `brand`.
+- `category`: filtra por categoria exacta.
+
+Ejemplo resumido de producto local:
 
 ```json
 {
@@ -167,6 +257,8 @@ Ejemplo de respuesta para un producto:
   "brand": "Campo Claro",
   "category": "milk",
   "price": 1150,
+  "carbonKg": 1.15,
+  "source": "local",
   "store": {
     "id": "store-centro",
     "name": "Mercado Verde Centro"
@@ -174,71 +266,13 @@ Ejemplo de respuesta para un producto:
 }
 ```
 
-Query params opcionales:
-
-- `search`: busca por `name` o `brand`.
-- `category`: filtra por categoria exacta.
-
-Ejemplos usados por el frontend:
-
-```http
-GET /api/products?search=leche
-GET /api/products?category=milk
-GET /api/products?search=entera&category=milk
-GET /api/products/barcode/7800000000001
-GET /api/products/barcode/3017620422003
-GET /api/products/prod-milk-001/analysis
-GET /api/products/prod-milk-001/alternatives
-```
-
-La API de productos es de solo lectura en esta etapa frontend.
-
-La busqueda por barcode consulta primero Supabase. Si el producto no existe localmente, el backend consulta Open Food Facts como fallback con timeout externo de 5000 ms, solicita solo los campos necesarios y retorna una respuesta normalizada con `source: "open_food_facts"`. Los errores externos se responden con mensajes genericos sin exponer detalles internos, y los productos externos pueden incluir campos `null` porque no se persisten en la base de datos.
-
-Analisis de sostenibilidad:
-
-```http
-GET /api/products/prod-milk-001/analysis
-```
-
-El analisis devuelve scores de `0` a `100` calculados dinamicamente para productos locales persistidos. El `economicScore` y el `carbonScore` son relativos a otros productos de la misma categoria, por eso la respuesta incluye un contexto con categoria y cantidad de productos comparados. Los datos ambientales son demostrativos y no representan una evaluacion cientifica certificada.
-
-Formula final:
-
-```text
-40% Economic
-40% Environmental
-20% Social
-```
-
-Formula ambiental:
-
-```text
-60% Carbon
-20% Local Product
-20% Recyclable Packaging
-```
-
-Formula social:
-
-```text
-80% Social Score
-20% Fair Trade
-```
-
-Los scores calculados no se guardan en la base de datos.
-
-## Optimization Engine
-
-El backend incluye optimizacion para listas de compra mediante:
+### Optimizacion
 
 ```http
 POST /api/optimization
 ```
 
-El frontend consume este endpoint desde `/optimizer`.
-
-Request:
+## Ejemplo de Optimization Request
 
 ```json
 {
@@ -255,6 +289,10 @@ Request:
     {
       "category": "rice",
       "quantity": 1
+    },
+    {
+      "category": "cleaning",
+      "quantity": 1
     }
   ]
 }
@@ -267,77 +305,128 @@ Respuesta resumida:
   "budget": 15000,
   "totalCost": 9860,
   "remainingBudget": 5140,
+  "baselineCost": 14140,
   "savings": 4280,
   "savingsPercentage": 30.27,
   "totalCarbonKg": 4.8,
+  "baselineCarbonKg": 6.7,
   "carbonReductionKg": 1.9,
   "carbonReductionPercentage": 28.36,
-  "averageEconomicUtility": 82.14,
   "averageSustainabilityScore": 76.43,
+  "averageEconomicUtility": 82.14,
   "averageUtilityScore": 79.29,
   "selectedItems": []
 }
 ```
 
-El motor modela una variante de Multiple Choice Knapsack: cada necesidad de compra agrupa alternativas y el algoritmo selecciona exactamente una opcion por categoria sin exceder el presupuesto. Si no existe una combinacion completa bajo presupuesto, responde error y no entrega una lista parcial.
+Los valores exactos dependen de las categorias, cantidades, presupuesto y datos actuales de Supabase.
 
-La utilidad multiobjetivo combina:
+## Algoritmos implementados
 
-```text
-economicUtility * economicWeight + sustainabilityScore * sustainabilityWeight
-```
+LiquiVerde implementa tres algoritmos principales:
 
-Los pesos deben ser no negativos y sumar `1`. Presets conceptuales soportados por el motor:
+1. Sustainability Scoring.
+2. Multi-objective Multiple Choice Knapsack.
+3. Sustitucion inteligente de productos.
 
-- Ahorro: `80% Economic`, `20% Sustainability`
-- Equilibrado: `50% Economic`, `50% Sustainability`
-- Sustentable: `30% Economic`, `70% Sustainability`
+## Algoritmo 1: Sustainability Scoring
 
-El motor calcula ahorro contra la combinacion mas cara disponible por grupo y reduccion de carbono contra la combinacion de mayor carbono. No consulta Prisma, no llama APIs externas y no persiste resultados.
+Calcula un indice de sostenibilidad entre `0` y `100` para productos locales persistidos.
 
-El endpoint carga productos reales desde Supabase, calcula dinamicamente el Sustainability Score de cada candidato con el motor de sostenibilidad y luego delega la seleccion al Optimization Engine. Los resultados no se persisten.
-
-## Algoritmo de Sustitucion Inteligente
-
-El backend expone recomendaciones de sustitucion mediante:
-
-```http
-GET /api/products/:id/alternatives
-```
-
-El endpoint solo trabaja con productos locales persistidos del dataset. Carga el producto origen, obtiene una vez todos los productos de la misma categoria con su tienda, calcula dinamicamente el Sustainability Score de cada producto usando el contexto completo de esa categoria y delega el ranking a un motor puro sin Prisma, HTTP ni llamadas externas.
-
-Regla de candidatos recomendables:
+El score economico se calcula relativo a productos de la misma categoria. Menor precio implica mejor score:
 
 ```text
-Caso A: candidate.price < source.price
-        AND candidate.sustainabilityScore >= source.sustainabilityScore
-
-Caso B: candidate.sustainabilityScore > source.sustainabilityScore
-        AND candidate.price <= source.price * 1.15
+economicScore = 100 * (maxPrice - price) / (maxPrice - minPrice)
 ```
 
-Esto evita recomendar productos simultaneamente mas caros y menos sostenibles. El carbono no es un tercer objetivo del ranking porque ya influye en el Sustainability Score, pero se devuelve como metadata comparativa.
-
-Normalizacion economica:
+El score de carbono tambien es relativo a la misma categoria. Menor `carbonKg` implica mejor score:
 
 ```text
-economicImprovementScore =
-  (candidateSavings - minSavings) / (maxSavings - minSavings) * 100
+carbonScore = 100 * (maxCarbonKg - carbonKg) / (maxCarbonKg - minCarbonKg)
 ```
 
-Si todos los ahorros recomendables son iguales, el score economico usa un valor neutral de `50`.
+Si todos los valores del rango son iguales, se asigna `100` para evitar division por cero.
 
-Normalizacion sostenible:
+Formula ambiental:
 
 ```text
-sustainabilityImprovementScore =
-  (candidateImprovement - minImprovement) / (maxImprovement - minImprovement) * 100
+environmentalScore =
+  carbonScore * 0.60
+  + localProductScore * 0.20
+  + recyclablePackagingScore * 0.20
 ```
 
-Si todas las mejoras sostenibles son iguales, el score sostenible usa `50`.
+Formula social:
 
-Formula de ranking:
+```text
+socialScore =
+  persistedSocialScore * 0.80
+  + fairTradeScore * 0.20
+```
+
+Formula final:
+
+```text
+sustainabilityScore =
+  economicScore * 0.40
+  + environmentalScore * 0.40
+  + socialScore * 0.20
+```
+
+Los scores se calculan en runtime, se redondean a 2 decimales y no se persisten.
+
+## Algoritmo 2: Multi-objective MCMKP
+
+El Optimization Engine modela la lista de compra como una variante de Multiple Choice Knapsack Problem:
+
+- Cada categoria solicitada es un grupo.
+- Cada producto local de esa categoria es un candidato.
+- El algoritmo selecciona exactamente una alternativa por grupo.
+- La suma total no puede exceder el presupuesto.
+
+La utilidad economica favorece el menor precio dentro del grupo:
+
+```text
+economicUtility = 100 * (maxPrice - price) / (maxPrice - minPrice)
+```
+
+La utilidad multiobjetivo combina precio y sostenibilidad:
+
+```text
+utilityScore =
+  economicUtility * economicWeight
+  + sustainabilityScore * sustainabilityWeight
+```
+
+Los pesos deben ser no negativos y sumar `1`.
+
+Presets usados por el frontend:
+
+- Ahorro: `economic = 0.8`, `sustainability = 0.2`.
+- Equilibrado: `economic = 0.5`, `sustainability = 0.5`.
+- Sustentable: `economic = 0.3`, `sustainability = 0.7`.
+
+El motor usa busqueda DFS con poda por presupuesto, adecuada para el tamano esperado del dataset de la prueba. En empates aplica criterios deterministas: mayor utilidad, menor costo, mayor sostenibilidad promedio, menor carbono total y clave estable de productos.
+
+## Algoritmo 3: Sustitucion inteligente
+
+El endpoint `GET /api/products/:id/alternatives` recomienda sustitutos dentro de la misma categoria del producto origen.
+
+Un candidato es recomendable si cumple al menos una regla:
+
+```text
+candidate.price < source.price
+AND candidate.sustainabilityScore >= source.sustainabilityScore
+```
+
+o:
+
+```text
+candidate.sustainabilityScore > source.sustainabilityScore
+AND candidate.price <= source.price * 1.15
+```
+
+Despues se normalizan ahorro y mejora sostenible:
 
 ```text
 recommendationScore =
@@ -345,7 +434,7 @@ recommendationScore =
   + sustainabilityImprovementScore * 0.60
 ```
 
-Tie-breaking determinista:
+El endpoint retorna maximo 3 alternativas. El desempate es determinista:
 
 ```text
 recommendationScore DESC
@@ -355,94 +444,139 @@ carbonKg ASC
 productId ASC
 ```
 
-El endpoint retorna maximo 3 alternativas y no persiste recomendaciones.
+Las recomendaciones no se persisten.
 
-Ejemplos reales del dataset:
+## Open Food Facts
 
-- `prod-milk-001` recomienda `prod-milk-003`: cuesta `$170` mas, mejora `8.56` puntos de sostenibilidad y reduce `0.27 kg CO2e`.
-- `prod-milk-004` recomienda 3 alternativas; la primera es `prod-milk-003`, con ahorro de `$270`, mejora sostenible de `40.94` puntos y `recommendationScore` de `71.06`.
-- `prod-milk-003` no tiene sustitutos claramente mejores y retorna `recommendations: []`.
+`GET /api/products/barcode/:barcode` consulta primero Supabase por barcode.
 
-## Algoritmos implementados
+Si no hay coincidencia local, el backend consulta Open Food Facts con:
 
-LiquiVerde incluye tres algoritmos principales:
+- URL publica de producto por barcode.
+- Campos limitados: codigo, nombre, marca e imagen.
+- Timeout de 5000 ms.
+- User-Agent propio de la prueba.
 
-1. Sustainability Scoring: indice determinista 0-100 por producto.
-2. Multi-objective Multiple Choice Knapsack: seleccion de una alternativa por necesidad bajo presupuesto.
-3. Intelligent Product Substitution: ranking de sustitutos por ahorro y mejora sostenible.
+Los productos externos se devuelven normalizados con `source: "open_food_facts"` y pueden tener valores `null` para precio, carbono, tienda o atributos sostenibles. No se guardan en la base de datos.
 
-## Deployment
+## Funcionalidades frontend
 
-LiquiVerde esta preparado para desplegarse manualmente en Vercel usando Services dentro de un unico proyecto:
-
-```text
-frontend/ -> Angular
-backend/  -> NestJS
-```
-
-La configuracion raiz `vercel.json` define dos servicios y enruta primero `/api/*` al backend. El catch-all restante va al frontend Angular, por lo que las rutas SPA como `/products`, `/products/prod-milk-001` y `/optimizer` quedan servidas por Angular.
-
-Rutas esperadas en produccion:
+Rutas Angular:
 
 ```text
-/                               -> Angular
-/products                       -> Angular
-/products/:id                   -> Angular
-/optimizer                      -> Angular
-/api/health                     -> NestJS
-/api/products                   -> NestJS
-/api/products/:id/analysis      -> NestJS
-/api/products/:id/alternatives  -> NestJS
-/api/optimization               -> NestJS
+/
+/products
+/products/:id
+/optimizer
 ```
 
-El backend mantiene `app.setGlobalPrefix('api')`. Vercel Services entrega el path original al servicio backend, por ejemplo `/api/health`, por lo que no se configura un rewrite a `/api/api/*`.
+Funcionalidades implementadas:
 
-Variables del servicio backend:
+- Home con acceso al catalogo y al optimizador.
+- Catalogo con busqueda por texto y filtro por categoria.
+- Busqueda por barcode desde la pantalla de productos.
+- Detalle de producto local.
+- Analisis visual de sostenibilidad por producto.
+- Alternativas inteligentes en el detalle.
+- Optimizador con presupuesto, categorias, cantidades y presets.
+- Estados de carga, error y resultados vacios.
 
-```text
-DATABASE_URL
-DIRECT_URL
-PORT
-FRONTEND_URL
+## Tests
+
+Backend:
+
+```bash
+cd backend
+npm run test -- --runInBand
 ```
 
-En Vercel, `DATABASE_URL` debe configurarse manualmente y usar el Supabase Transaction Pooler en puerto `6543`. `DIRECT_URL` puede quedar disponible para Prisma CLI/migraciones, pero el runtime no ejecuta migraciones ni seed automaticamente. `FRONTEND_URL` solo es necesaria si se permite un frontend cross-origin; con `/api` same-origin no participa en las requests normales. `PORT` se mantiene para desarrollo local y Vercel normalmente lo entrega al runtime.
+Cobertura funcional incluida:
 
-El frontend usa `http://localhost:3000/api` en desarrollo local y `/api` fuera de localhost para funcionar same-origin en Vercel sin hardcodear la URL final.
+- Health check.
+- Products controller/service.
+- Busqueda y filtros de productos.
+- Barcode local y fallback Open Food Facts.
+- Sustainability Engine.
+- Optimization Engine e integracion HTTP.
+- Recommendation Engine e integracion con productos.
 
-Flujo manual recomendado:
+Frontend:
 
-1. Subir los cambios a GitHub.
-2. Importar el repositorio en Vercel.
-3. Seleccionar framework `Services` en el proyecto.
-4. Confirmar los servicios `frontend` y `backend`.
-5. Configurar las variables de entorno del backend sin secretos en el repo.
-6. Ejecutar deploy manual.
-7. Validar `/api/health`.
-8. Validar `/`, `/products`, `/products/prod-milk-001` y `/optimizer`.
+```bash
+cd frontend
+npm test -- --watch=false --browsers=ChromeHeadless
+```
 
-## Estado actual
+Cobertura funcional incluida:
 
-Fase 0 tecnica:
+- Creacion de la aplicacion y navegacion base.
+- Servicios HTTP de productos y optimizacion.
+- Catalogo, busqueda, filtros y barcode.
+- Detalle con analisis y recomendaciones.
+- Optimizador, presets, validaciones y resultados.
 
-- Frontend Angular inicial creado.
-- Backend NestJS inicial creado.
-- Prefijo global `/api` configurado.
-- CORS preparado para desarrollo local.
-- Validacion global preparada en NestJS.
-- Prisma configurado para PostgreSQL/Supabase sin modelos de negocio todavia.
-- Modelos Prisma iniciales `Store` y `Product` creados.
-- Dataset controlado inicial creado.
-- API Products base de solo lectura creada con busqueda y filtro por categoria.
-- Analisis de sostenibilidad expuesto para productos locales.
-- Optimization Engine puro e integracion HTTP implementados en backend.
-- Frontend Angular P7.1 implementado con home, catalogo, busqueda, filtros y detalle basico.
-- Frontend Angular P7.2 implementado con analisis visual de sostenibilidad y busqueda por barcode.
-- Frontend Angular P8 implementado con optimizador de compra, presets, cantidades y resultados reales.
-- Fase P9 implementada con Recommendation Engine puro, endpoint `GET /api/products/:id/alternatives` y recomendaciones visibles en detalle.
-- Preparacion P10.1 para Vercel Services agregada sin ejecutar deploy.
+## Manejo de errores
 
-## Plan del proyecto
+- Colecciones sin resultados responden `200` con `[]`.
+- Producto inexistente responde `404`.
+- Barcode invalido responde `400`.
+- Datos invalidos para scoring u optimizacion responden como errores controlados.
+- Presupuesto insuficiente en optimizacion no devuelve lista parcial.
+- Fallos inesperados de base de datos se encapsulan con mensajes genericos.
+- Fallos de Open Food Facts se manejan como gateway error o timeout sin exponer detalles internos.
 
-El detalle de fases, arquitectura objetivo, decisiones pendientes y restricciones de calidad esta documentado en [`PROJECT_PLAN.md`](./PROJECT_PLAN.md).
+## Supuestos y limitaciones
+
+- El dataset es pequeno y demostrativo.
+- La huella de carbono y atributos sostenibles no son datos certificados.
+- Los scores son relativos a productos de la misma categoria.
+- No hay autenticacion ni roles.
+- No hay CRUD de productos o tiendas.
+- No hay paginacion compleja ni ordenamiento configurable.
+- No se persisten analisis, optimizaciones ni recomendaciones.
+- Open Food Facts se usa solo como fallback de lectura por barcode.
+- El deploy cloud no se presenta como parte funcional validada de esta entrega.
+
+## Bonus implementados
+
+- Fallback externo por barcode con Open Food Facts.
+- Optimizador multiobjetivo con presets de prioridad.
+- Recomendaciones inteligentes de sustitucion.
+- Visualizacion frontend de sostenibilidad y metricas de optimizacion.
+- Seed idempotente.
+- Separacion entre motores puros y servicios de infraestructura.
+
+## Uso de IA
+
+Durante el desarrollo se utilizo asistencia de IA como apoyo para:
+
+- Estructurar fases tecnicas del proyecto.
+- Generar y revisar implementaciones de backend y frontend.
+- Disenar casos de prueba unitarios.
+- Documentar formulas, supuestos y endpoints.
+- Detectar inconsistencias entre codigo, README y plan.
+
+Las decisiones finales, restricciones de alcance y validaciones se mantuvieron alineadas con el codigo versionado del repositorio.
+
+## Seguridad
+
+- `.env` y variantes reales estan ignorados por `.gitignore`.
+- `.env.example` es el unico archivo de entorno versionable.
+- No se deben commitear connection strings, passwords, tokens ni credenciales de Supabase.
+- No imprimir credenciales en logs ni respuestas de error.
+- Configurar secretos de runtime en el entorno local o plataforma correspondiente.
+
+## Estado del proyecto
+
+Estado funcional actual:
+
+- Backend NestJS con prefijo global `/api`.
+- Prisma conectado a PostgreSQL/Supabase.
+- Dataset de 5 tiendas y 50 productos en 10 categorias.
+- API de productos de solo lectura con busqueda, filtros y barcode.
+- Analisis de sostenibilidad para productos locales.
+- Optimizacion de listas de compra bajo presupuesto.
+- Sustitucion inteligente de productos.
+- Frontend Angular con catalogo, detalle, analisis, recomendaciones y optimizador.
+
+El detalle historico por fases esta documentado en [`PROJECT_PLAN.md`](./PROJECT_PLAN.md).

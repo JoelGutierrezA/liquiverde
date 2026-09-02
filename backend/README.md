@@ -83,3 +83,39 @@ Formula ambiental: `60% Carbon`, `20% Local Product`, `20% Recyclable Packaging`
 Formula social: `80% Social Score`, `20% Fair Trade`.
 
 Los datos ambientales son demostrativos, no representan una evaluacion cientifica certificada y los scores no se persisten.
+
+## Optimization Engine
+
+Existe optimizacion de listas de compra mediante:
+
+```text
+POST /api/optimization
+```
+
+Request:
+
+```json
+{
+  "budget": 15000,
+  "weights": {
+    "economic": 0.5,
+    "sustainability": 0.5
+  },
+  "items": [
+    {
+      "category": "milk",
+      "quantity": 1
+    },
+    {
+      "category": "rice",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+Resuelve una variante de Multiple Choice Knapsack para seleccionar exactamente una alternativa por categoria bajo presupuesto. El endpoint carga productos reales, calcula Sustainability Score dinamicamente por candidato, ejecuta el motor puro y no persiste resultados.
+
+La utilidad combina `economicUtility * economicWeight + sustainabilityScore * sustainabilityWeight`. Los pesos validos son no negativos y suman `1`; los presets conceptuales son ahorro `0.8/0.2`, equilibrado `0.5/0.5` y sustentable `0.3/0.7`.
+
+El motor calcula savings contra la combinacion mas cara por grupo y reduccion de carbono contra la combinacion de mayor carbono. La capa HTTP usa Supabase solo para cargar candidatos; el motor puro no usa Prisma, no llama APIs externas y no persiste resultados.

@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { resolve } from 'node:path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { OptimizationModule } from './optimization/optimization.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ProductsModule } from './products/products.module';
 
@@ -16,6 +17,7 @@ const envFilePaths = [resolve(process.cwd(), '..', '.env'), resolve(process.cwd(
     }),
     PrismaModule,
     ProductsModule,
+    OptimizationModule,
   ],
   controllers: [AppController],
   providers: [AppService],

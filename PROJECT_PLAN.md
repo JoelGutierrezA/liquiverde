@@ -171,11 +171,12 @@ Sustainability Score =
 
 ### Fase 6 - Optimization Engine
 
-- Implementar variante de Multiple Choice Knapsack Problem.
-- Respetar presupuesto.
-- Elegir una alternativa por necesidad.
-- Maximizar funcion multiobjetivo con valores normalizados.
-- Agregar tests unitarios.
+- Implementar variante de Multiple Choice Knapsack Problem. Implementado en P6.1 como motor puro.
+- Respetar presupuesto. Implementado en P6.1.
+- Elegir una alternativa por necesidad. Implementado en P6.1.
+- Maximizar funcion multiobjetivo con valores normalizados. Implementado en P6.1.
+- Agregar tests unitarios. Implementado en P6.1.
+- Integrar con productos reales, Sustainability Engine y exponer `POST /api/optimization`. Implementado en P6.2.
 
 ### Fase 7 - Frontend optimizador
 
@@ -407,8 +408,8 @@ Pendiente para fases posteriores:
 
 El siguiente paso recomendado es continuar con la siguiente fase solicitada:
 
-1. Continuar con Optimization Engine solo si se define P6.
-2. Mantener Recommendations fuera hasta su fase.
+1. Mantener Recommendations fuera hasta su fase.
+2. Conectar frontend al catalogo y detalle solo si se define P7.
 3. Agregar validaciones o tests adicionales si el contrato de API crece.
 
 No se debe crear todavia ningun modulo funcional de Products, Sustainability, Optimization ni integraciones externas hasta recibir la instruccion correspondiente.

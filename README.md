@@ -183,6 +183,73 @@ Formula social:
 
 Los scores calculados no se guardan en la base de datos.
 
+## Optimization Engine
+
+El backend incluye optimizacion para listas de compra mediante:
+
+```http
+POST /api/optimization
+```
+
+Request:
+
+```json
+{
+  "budget": 15000,
+  "weights": {
+    "economic": 0.5,
+    "sustainability": 0.5
+  },
+  "items": [
+    {
+      "category": "milk",
+      "quantity": 1
+    },
+    {
+      "category": "rice",
+      "quantity": 1
+    }
+  ]
+}
+```
+
+Respuesta resumida:
+
+```json
+{
+  "budget": 15000,
+  "totalCost": 9860,
+  "remainingBudget": 5140,
+  "savings": 4280,
+  "savingsPercentage": 30.27,
+  "totalCarbonKg": 4.8,
+  "carbonReductionKg": 1.9,
+  "carbonReductionPercentage": 28.36,
+  "averageEconomicUtility": 82.14,
+  "averageSustainabilityScore": 76.43,
+  "averageUtilityScore": 79.29,
+  "selectedItems": []
+}
+```
+
+El motor modela una variante de Multiple Choice Knapsack: cada necesidad de compra agrupa alternativas y el algoritmo selecciona exactamente una opcion por categoria sin exceder el presupuesto. Si no existe una combinacion completa bajo presupuesto, responde error y no entrega una lista parcial.
+
+La utilidad multiobjetivo combina:
+
+```text
+economicUtility * economicWeight + sustainabilityScore * sustainabilityWeight
+```
+
+Los pesos deben ser no negativos y sumar `1`. Presets conceptuales soportados por el motor:
+
+- Ahorro: `80% Economic`, `20% Sustainability`
+- Equilibrado: `50% Economic`, `50% Sustainability`
+- Sustentable: `30% Economic`, `70% Sustainability`
+
+El motor calcula ahorro contra la combinacion mas cara disponible por grupo y reduccion de carbono contra la combinacion de mayor carbono. No consulta Prisma, no llama APIs externas y no persiste resultados.
+
+El endpoint carga productos reales desde Supabase, calcula dinamicamente el Sustainability Score de cada candidato con el motor de sostenibilidad y luego delega la seleccion al Optimization Engine. Los resultados no se persisten.
+
 ## Estado actual
 
 Fase 0 tecnica:
@@ -197,6 +264,7 @@ Fase 0 tecnica:
 - Dataset controlado inicial creado.
 - API Products base de solo lectura creada con busqueda y filtro por categoria.
 - Analisis de sostenibilidad expuesto para productos locales.
+- Optimization Engine puro implementado sin endpoint HTTP.
 
 ## Plan del proyecto
 

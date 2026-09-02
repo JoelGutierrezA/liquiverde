@@ -107,8 +107,6 @@ Para conectar el backend con Supabase, configura estas variables en el entorno l
 - `DATABASE_URL`: connection string principal usada por Prisma Client.
 - `DIRECT_URL`: connection string usada por Prisma para operaciones de migracion.
 
-No copies credenciales reales en README, commits ni archivos versionados.
-
 Para Supabase, `DATABASE_URL` usa el Shared Transaction Pooler y `DIRECT_URL` usa el Shared Session Pooler para migraciones en entornos IPv4.
 
 ## Base de datos y dataset

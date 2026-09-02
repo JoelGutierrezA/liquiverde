@@ -61,9 +61,25 @@ GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
 GET /api/products/barcode/:barcode
+GET /api/products/:id/analysis
 GET /api/products/:id
 ```
 
 La respuesta incluye informacion basica del producto y de su tienda asociada. `search` busca por nombre o marca, y `category` filtra por categoria exacta. La API es de solo lectura en esta fase.
 
-`GET /api/products/barcode/:barcode` busca primero en la base local. Si no hay coincidencia, consulta Open Food Facts desde el backend y normaliza la respuesta sin persistir el producto externo.
+`GET /api/products/barcode/:barcode` busca primero en la base local. Si no hay coincidencia, consulta Open Food Facts desde el backend con timeout de 5000 ms, normaliza la respuesta y no persiste el producto externo. Los errores del servicio externo se manejan con respuestas genericas para no exponer detalles internos.
+
+`GET /api/products/:id/analysis` calcula scores dinamicos de sostenibilidad para productos locales. El resultado compara precio y carbono contra productos de la misma categoria e incluye:
+
+- `economicScore`
+- `environmentalScore`
+- `socialScore`
+- `sustainabilityScore`
+- `breakdown`
+- `context`
+
+Formula final: `40% Economic`, `40% Environmental`, `20% Social`.
+Formula ambiental: `60% Carbon`, `20% Local Product`, `20% Recyclable Packaging`.
+Formula social: `80% Social Score`, `20% Fair Trade`.
+
+Los datos ambientales son demostrativos, no representan una evaluacion cientifica certificada y los scores no se persisten.

@@ -20,12 +20,23 @@ export class ProductsController {
     return this.productsService.findByBarcode(barcode);
   }
 
+  @Get(':id/analysis')
+  analyzeProduct(@Param('id') id: string) {
+    this.validateProductId(id);
+
+    return this.productsService.analyzeProduct(id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
+    this.validateProductId(id);
+
+    return this.productsService.findOne(id);
+  }
+
+  private validateProductId(id: string): void {
     if (!/^[a-zA-Z0-9_-]+$/.test(id)) {
       throw new BadRequestException('Product id is invalid.');
     }
-
-    return this.productsService.findOne(id);
   }
 }

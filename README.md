@@ -120,6 +120,7 @@ GET /api/products?search=leche
 GET /api/products?category=milk
 GET /api/products?search=entera&category=milk
 GET /api/products/barcode/:barcode
+GET /api/products/:id/analysis
 GET /api/products/:id
 ```
 
@@ -147,7 +148,40 @@ Query params opcionales:
 
 La API de productos es de solo lectura en esta etapa. Sostenibilidad y optimizacion se implementaran en fases posteriores.
 
-La busqueda por barcode consulta primero Supabase. Si el producto no existe localmente, el backend consulta Open Food Facts y retorna una respuesta normalizada con `source: "open_food_facts"`. Los productos externos pueden incluir campos `null` y no se persisten en la base de datos.
+La busqueda por barcode consulta primero Supabase. Si el producto no existe localmente, el backend consulta Open Food Facts como fallback con timeout externo de 5000 ms, solicita solo los campos necesarios y retorna una respuesta normalizada con `source: "open_food_facts"`. Los errores externos se responden con mensajes genericos sin exponer detalles internos, y los productos externos pueden incluir campos `null` porque no se persisten en la base de datos.
+
+Analisis de sostenibilidad:
+
+```http
+GET /api/products/prod-milk-001/analysis
+```
+
+El analisis devuelve scores de `0` a `100` calculados dinamicamente para productos locales persistidos. El `economicScore` y el `carbonScore` son relativos a otros productos de la misma categoria, por eso la respuesta incluye un contexto con categoria y cantidad de productos comparados. Los datos ambientales son demostrativos y no representan una evaluacion cientifica certificada.
+
+Formula final:
+
+```text
+40% Economic
+40% Environmental
+20% Social
+```
+
+Formula ambiental:
+
+```text
+60% Carbon
+20% Local Product
+20% Recyclable Packaging
+```
+
+Formula social:
+
+```text
+80% Social Score
+20% Fair Trade
+```
+
+Los scores calculados no se guardan en la base de datos.
 
 ## Estado actual
 
@@ -162,6 +196,7 @@ Fase 0 tecnica:
 - Modelos Prisma iniciales `Store` y `Product` creados.
 - Dataset controlado inicial creado.
 - API Products base de solo lectura creada con busqueda y filtro por categoria.
+- Analisis de sostenibilidad expuesto para productos locales.
 
 ## Plan del proyecto
 

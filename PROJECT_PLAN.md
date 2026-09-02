@@ -148,10 +148,11 @@ Separacion esperada por modulo:
 
 ### Fase 4 - Sustainability Engine
 
-- Implementar scoring determinista de 0 a 100.
-- Considerar economic score, environmental score y social score.
-- Agregar tests unitarios.
-- Documentar formula y supuestos.
+- Implementar scoring determinista de 0 a 100. Implementado en P5.1 como motor puro.
+- Considerar economic score, environmental score y social score. Implementado en P5.1.
+- Agregar tests unitarios. Implementado en P5.1.
+- Integrar el motor con Products y exponer `GET /api/products/:id/analysis`. Implementado en P5.2.
+- Documentar formula y supuestos. Implementado en P5.2.
 
 Formula inicial:
 
@@ -406,8 +407,8 @@ Pendiente para fases posteriores:
 
 El siguiente paso recomendado es continuar con la siguiente fase solicitada:
 
-1. Robustecer manejo de errores externos si se define P4.2.
-2. Mantener Sustainability, Optimization y Recommendations fuera hasta sus fases.
+1. Continuar con Optimization Engine solo si se define P6.
+2. Mantener Recommendations fuera hasta su fase.
 3. Agregar validaciones o tests adicionales si el contrato de API crece.
 
 No se debe crear todavia ningun modulo funcional de Products, Sustainability, Optimization ni integraciones externas hasta recibir la instruccion correspondiente.

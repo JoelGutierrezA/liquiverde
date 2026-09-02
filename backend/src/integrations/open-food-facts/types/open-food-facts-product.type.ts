@@ -1,10 +1,7 @@
 export type OpenFoodFactsProduct = {
   product_name?: string;
-  product_name_en?: string;
-  generic_name?: string;
   brands?: string;
   image_front_url?: string;
-  image_url?: string;
 };
 
 export type OpenFoodFactsProductResponse = {

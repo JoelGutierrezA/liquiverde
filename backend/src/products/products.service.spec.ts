@@ -1,7 +1,14 @@
-import { InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  BadGatewayException,
+  InternalServerErrorException,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { OpenFoodFactsService } from '../integrations/open-food-facts/open-food-facts.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { SustainabilityService } from '../sustainability/sustainability.service';
+import { SustainabilityInputError } from '../sustainability/types/sustainability-error.type';
 import { ProductsService } from './products.service';
 
 const product = {
@@ -36,6 +43,21 @@ describe('ProductsService', () => {
   const openFoodFactsMock = {
     findByBarcode: jest.fn(),
   };
+  const sustainabilityMock = {
+    analyze: jest.fn(),
+  };
+  const analysis = {
+    economicScore: 72.13,
+    environmentalScore: 80,
+    socialScore: 57.6,
+    sustainabilityScore: 72.37,
+    breakdown: {
+      carbonScore: 46.81,
+      localProductScore: 100,
+      recyclablePackagingScore: 100,
+      fairTradeScore: 0,
+    },
+  };
 
   beforeEach(async () => {
     jest.clearAllMocks();
@@ -50,6 +72,10 @@ describe('ProductsService', () => {
         {
           provide: OpenFoodFactsService,
           useValue: openFoodFactsMock,
+        },
+        {
+          provide: SustainabilityService,
+          useValue: sustainabilityMock,
         },
       ],
     }).compile();
@@ -202,6 +228,115 @@ describe('ProductsService', () => {
     openFoodFactsMock.findByBarcode.mockResolvedValue(null);
 
     await expect(service.findByBarcode('1234567890123')).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('findByBarcode propagates controlled Open Food Facts errors', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(null);
+    openFoodFactsMock.findByBarcode.mockRejectedValue(new BadGatewayException('External product service is unavailable.'));
+
+    await expect(service.findByBarcode('3017620422003')).rejects.toBeInstanceOf(BadGatewayException);
+  });
+
+  it('analyzeProduct returns analysis for an existing product', async () => {
+    const comparableProducts = [
+      product,
+      {
+        ...product,
+        id: 'prod-milk-002',
+        name: 'Leche descremada economica 1 L',
+        price: 980,
+        carbonKg: 1.35,
+        localProduct: false,
+        recyclablePackaging: false,
+        socialScore: 48,
+      },
+    ];
+    prismaMock.product.findUnique.mockResolvedValue(product);
+    prismaMock.product.findMany.mockResolvedValue(comparableProducts);
+    sustainabilityMock.analyze.mockReturnValue(analysis);
+
+    await expect(service.analyzeProduct('prod-milk-001')).resolves.toEqual({
+      product: {
+        id: 'prod-milk-001',
+        name: 'Leche entera familiar 1 L',
+        brand: 'Campo Claro',
+        category: 'milk',
+        price: 1150,
+      },
+      analysis,
+      context: {
+        category: 'milk',
+        comparedProducts: 2,
+      },
+    });
+  });
+
+  it('analyzeProduct throws NotFoundException when product does not exist', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(null);
+
+    await expect(service.analyzeProduct('missing-product')).rejects.toBeInstanceOf(NotFoundException);
+    expect(prismaMock.product.findMany).not.toHaveBeenCalled();
+    expect(sustainabilityMock.analyze).not.toHaveBeenCalled();
+  });
+
+  it('analyzeProduct loads comparable products from the same category', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(product);
+    prismaMock.product.findMany.mockResolvedValue([product]);
+    sustainabilityMock.analyze.mockReturnValue(analysis);
+
+    await service.analyzeProduct('prod-milk-001');
+
+    expect(prismaMock.product.findMany).toHaveBeenCalledWith({
+      where: { category: 'milk' },
+      orderBy: [{ category: 'asc' }, { name: 'asc' }],
+      select: expect.objectContaining({
+        category: true,
+        price: true,
+        carbonKg: true,
+        socialScore: true,
+      }),
+    });
+  });
+
+  it('analyzeProduct delegates scoring to SustainabilityService', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(product);
+    prismaMock.product.findMany.mockResolvedValue([product]);
+    sustainabilityMock.analyze.mockReturnValue(analysis);
+
+    await service.analyzeProduct('prod-milk-001');
+
+    expect(sustainabilityMock.analyze).toHaveBeenCalledWith(
+      {
+        category: 'milk',
+        price: 1150,
+        carbonKg: 1.15,
+        localProduct: true,
+        recyclablePackaging: true,
+        fairTrade: false,
+        socialScore: 72,
+      },
+      [
+        {
+          category: 'milk',
+          price: 1150,
+          carbonKg: 1.15,
+          localProduct: true,
+          recyclablePackaging: true,
+          fairTrade: false,
+          socialScore: 72,
+        },
+      ],
+    );
+  });
+
+  it('analyzeProduct converts SustainabilityInputError to UnprocessableEntityException', async () => {
+    prismaMock.product.findUnique.mockResolvedValue(product);
+    prismaMock.product.findMany.mockResolvedValue([product]);
+    sustainabilityMock.analyze.mockImplementation(() => {
+      throw new SustainabilityInputError('invalid persisted data');
+    });
+
+    await expect(service.analyzeProduct('prod-milk-001')).rejects.toBeInstanceOf(UnprocessableEntityException);
   });
 
   it('findAll hides unexpected database errors', async () => {
